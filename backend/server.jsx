@@ -1,11 +1,17 @@
 const express = require("express");
 const cors = require("cors");
 const axios = require("axios");
+const fetch = require("node-fetch");
 const csv = require("csv-parser");
 const { Readable } = require("stream");
+const GtfsRealtimeBindings = require('gtfs-realtime-bindings');
+require('dotenv').config();
 
 const app = express();
-app.use(cors());
+const expressWs = require('express-ws')(app);
+app.use(cors())
+
+const API_KEY = process.env.API_KEY;
 
 const cityToAuthorityId = {
   jyväskylä: "209",
@@ -79,6 +85,37 @@ app.get("/api/routes/:city", async (req, res) => {
     res.status(500).json({ error: "Failed to load routes data." });
   }
 });
+
+app.ws("/api/bus", (ws, req) => { });
+const bus = expressWs.getWss('/api/bus');
+
+app.get("/api/bus/http", async (req, res) => {
+  const data = await fetchBuses();
+  res.json(data);
+});
+
+const fetchBuses = async () => {
+  const url = `https://data.waltti.fi/jyvaskyla/api/gtfsrealtime/v1.0/feed/vehicleposition`;
+  const response = await fetch(url, {
+      headers: {
+        "Authorization": `Basic ${API_KEY}`,
+      },
+    });
+
+  if (!response.ok) {
+    const error = new Error(`${response.url}: ${response.status} ${response.statusText}`);
+    error.response = response;
+    throw error;
+    process.exit(1);
+  }
+  const buffer = await response.arrayBuffer(); //Buffer.from(response);
+  const feed = GtfsRealtimeBindings.transit_realtime.FeedMessage.decode(
+    new Uint8Array(buffer)
+  );
+  const entities = Array.from(feed.entity);
+  return vehicles = entities
+    .map((e) => e.vehicle);
+};
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {

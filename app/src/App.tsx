@@ -4,6 +4,7 @@ function App() {
   const [routes, setRoutes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [buses, setBuses] = useState([]);
 
   useEffect(() => {
     fetch("http://localhost:5000/api/routes/jyväskylä")
@@ -21,9 +22,15 @@ function App() {
       });
   }, []);
 
+  useEffect(() => {
+    fetch("http://localhost:5000/api/bus/http")
+      .then((res) => res.json())
+      .then(setBuses)
+  }, []);
+
   if (loading) return <div>Loading routes...</div>;
   if (error) return <div>Error: {error}</div>;
-
+  console.log(buses);
   return (
     <div style={{ padding: "20px" }}>
       <h1>Waltti Routes in Jyväskylä</h1>
@@ -34,6 +41,9 @@ function App() {
             {route.route_long_name || route.route_id}
           </li>
         ))}
+      </ul>
+      <ul>
+        {buses.map((bus) => <p>{JSON.stringify(bus)}</p>)}
       </ul>
     </div>
   );
