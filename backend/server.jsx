@@ -86,8 +86,9 @@ app.get("/api/routes/:city", async (req, res) => {
   }
 });
 
-app.ws("/api/bus", (ws, req) => { });
+app.ws("/api/bus", (ws, req) => { ws.json([])});
 const bus = expressWs.getWss('/api/bus');
+
 
 app.get("/api/bus/http", async (req, res) => {
   const data = await fetchBuses();
@@ -116,6 +117,16 @@ const fetchBuses = async () => {
   return vehicles = entities
     .map((e) => e.vehicle);
 };
+
+const broadcastBuses = async (connections) => {
+  if (connections.length == 0) {
+    return;
+  }
+  const buses = await fetchBuses();
+  connections.forEach(client => client.send(JSON.stringify(buses)));
+}
+
+setInterval(() => broadcastBuses(bus.clients), 2000);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {

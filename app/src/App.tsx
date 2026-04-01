@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
+import { MapContainer, TileLayer, Marker, Popup} from "react-leaflet";
 function App() {
   const [routes, setRoutes] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -23,14 +23,24 @@ function App() {
   }, []);
 
   useEffect(() => {
-    fetch("http://localhost:5000/api/bus/http")
-      .then((res) => res.json())
-      .then(setBuses)
-  }, []);
-  const position = [62.24147, 25.72088];
+    const sock = new WebSocket("ws://localhost:5000/api/bus");
+
+    sock.onopen = () => console.log('Connected');
+    sock.onmessage = (event) => {
+      setBuses(JSON.parse(event.data));
+    };
+    sock.onclose = () => console.log('Disconnected');
+
+    // Cleanup on unmount
+    return () => sock.close();
+
+  });
+
+  const getRoute = (routeId) => routes.find((r) => r.route_id == routeId);
+
+  const map_position = [62.24147, 25.72088];
   if (loading) return <div>Loading routes...</div>;
   if (error) return <div>Error: {error}</div>;
-  console.log(buses);
   return (
     <div style={{ /*padding: "20px"*/ }}>
       <h1>Waltti Routes in Jyväskylä</h1>
@@ -42,20 +52,21 @@ function App() {
           </li>
         ))}
       </ul>
-      <ul>
-        {buses.map((bus) => <p key={bus.vehicle.id}>{JSON.stringify(bus)}</p>)}
-      </ul>
-      <MapContainer center={position} zoom={13} scrollWheelZoom={false}>
+      <MapContainer center={map_position} zoom={13} scrollWheelZoom={false}>
         <TileLayer
-      attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-      url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-    />
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+        />
         {buses.map(bus =>
           <Marker key={bus.vehicle.id} position={pos(bus.position)}>
             <Popup>
-              A pretty CSS3 popup. <br /> Easily customizable.
+              <p>
+                {getRoute(bus.trip.routeId).route_short_name}
+
+              </p>
             </Popup>
           </Marker>
+
         )}
       </MapContainer>
       <p> end</p>
