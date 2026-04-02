@@ -15,4 +15,5 @@ We will use React as our primary frontend technology. The deciding factor is tha
 ## Consequences
 
 * **Positive:** Development can start immediately with minimal friction since the team can rely on existing knowledge.
-* **Negative:** Because React is a UI library rather than a fully-featured framework, we may need to make additional architectural decisions and write more ADRs in the future for things like routing or global state management if the application grows in complexity.
+* **Negative:** React is a UI library, not a full framework. We will need separate decisions for routing and state management.
+* **Negative:** As complexity grows, we will likely write additional ADRs for concerns that opinionated frameworks like Next.js provide out of the box.

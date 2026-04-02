@@ -1,4 +1,4 @@
-# 001 Record Architecture Decisions
+# 001 Use Architecture Decision Records
 
 ## Status
 
