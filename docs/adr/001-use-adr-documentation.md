@@ -1,5 +1,7 @@
 # 001 Use Architecture Decision Records
 
+Date: 30.3.2026
+
 ## Status
 
 Accepted

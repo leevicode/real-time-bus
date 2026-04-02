@@ -1,5 +1,7 @@
 # 002 Use GitHub instead of GitLab
 
+Date: 30.3.2026
+
 ## Status
 
 Accepted
