@@ -105,7 +105,6 @@ const fetchBuses = async () => {
     const error = new Error(`${response.url}: ${response.status} ${response.statusText}`);
     error.response = response;
     throw error;
-    process.exit(1);
   }
   const buffer = await response.arrayBuffer();
   const feed = GtfsRealtimeBindings.transit_realtime.FeedMessage.decode(
@@ -120,8 +119,12 @@ const broadcastBuses = async (connections) => {
   if (connections.length === 0) {
     return;
   }
-  const buses = await fetchBuses();
-  connections.forEach(client => client.send(JSON.stringify(buses)));
+  try {
+    const buses = await fetchBuses();
+    connections.forEach(client => client.send(JSON.stringify(buses)));
+  } catch (error) {
+    console.log("error fetching buses: ",error);
+  }
 }
 
 setInterval(() => broadcastBuses(busSocket.clients), 2000);
