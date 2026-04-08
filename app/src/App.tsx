@@ -1,5 +1,7 @@
-import { useState, useEffect } from "react";
-import { MapContainer, TileLayer, Marker, Popup} from "react-leaflet";
+import { useState, useEffect, } from "react";
+import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
+import { makeSocket } from "./service/busSocket";
+import { RouteInfo } from "./component/RouteInfo";
 function App() {
   const [routes, setRoutes] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -23,18 +25,15 @@ function App() {
   }, []);
 
   useEffect(() => {
-    const sock = new WebSocket("ws://localhost:5000/api/bus");
-
-    sock.onopen = () => console.log('Connected');
-    sock.onmessage = (event) => {
+    const busSocket = makeSocket();
+    busSocket.onopen = () => console.log('Connected');
+    busSocket.onmessage = (event) => {
       setBuses(JSON.parse(event.data));
     };
-    sock.onclose = () => console.log('Disconnected');
-
+    busSocket.onclose = () => console.log('Disconnected');
     // Cleanup on unmount
-    return () => sock.close();
-
-  });
+    return () => busSocket.close();
+  }, []);
 
   const getRoute = (routeId) => routes.find((r) => r.route_id == routeId);
 
@@ -42,7 +41,7 @@ function App() {
   if (loading) return <div>Loading routes...</div>;
   if (error) return <div>Error: {error}</div>;
   return (
-    <div style={{ /*padding: "20px"*/ }}>
+    <div>
       <h1>Waltti Routes in Jyväskylä</h1>
       <ul>
         {routes.map((route) => (
@@ -58,15 +57,12 @@ function App() {
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
         {buses.map(bus =>
+
           <Marker key={bus.vehicle.id} position={pos(bus.position)}>
             <Popup>
-              <p>
-                {getRoute(bus.trip.routeId).route_short_name}
-
-              </p>
+              <RouteInfo route={getRoute(bus.trip.routeId)}/>
             </Popup>
           </Marker>
-
         )}
       </MapContainer>
       <p> end</p>
