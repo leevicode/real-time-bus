@@ -86,14 +86,12 @@ app.get("/api/routes/:city", async (req, res) => {
   }
 });
 
-app.ws("/api/bus", (ws, req) => { ws.json([])});
-const bus = expressWs.getWss('/api/bus');
-
-
-app.get("/api/bus/http", async (req, res) => {
-  const data = await fetchBuses();
-  res.json(data);
+app.ws("/api/bus", (ws, req) => {
+  console.log("WebSocket client connected");
+  ws.on("close", () => console.log("Client disconnected"));
+  ws.on("error", (err) => console.error("WebSocket error:", err));
 });
+const busSocket = expressWs.getWss('/api/bus');
 
 const fetchBuses = async () => {
   const url = `https://data.waltti.fi/jyvaskyla/api/gtfsrealtime/v1.0/feed/vehicleposition`;
@@ -109,7 +107,7 @@ const fetchBuses = async () => {
     throw error;
     process.exit(1);
   }
-  const buffer = await response.arrayBuffer(); //Buffer.from(response);
+  const buffer = await response.arrayBuffer();
   const feed = GtfsRealtimeBindings.transit_realtime.FeedMessage.decode(
     new Uint8Array(buffer)
   );
@@ -119,14 +117,14 @@ const fetchBuses = async () => {
 };
 
 const broadcastBuses = async (connections) => {
-  if (connections.length == 0) {
+  if (connections.length === 0) {
     return;
   }
   const buses = await fetchBuses();
   connections.forEach(client => client.send(JSON.stringify(buses)));
 }
 
-setInterval(() => broadcastBuses(bus.clients), 2000);
+setInterval(() => broadcastBuses(busSocket.clients), 2000);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
