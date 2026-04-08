@@ -1,6 +1,6 @@
 import { useState, useEffect, } from "react";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
-import { makeSocket } from "./service/busSocket";
+import { getSocket } from "./service/busSocket";
 import { RouteInfo } from "./component/RouteInfo";
 function App() {
   const [routes, setRoutes] = useState([]);
@@ -25,14 +25,18 @@ function App() {
   }, []);
 
   useEffect(() => {
-    const busSocket = makeSocket();
-    busSocket.onopen = () => console.log('Connected');
-    busSocket.onmessage = (event) => {
-      setBuses(JSON.parse(event.data));
-    };
-    busSocket.onclose = () => console.log('Disconnected');
-    // Cleanup on unmount
-    return () => busSocket.close();
+    getSocket()
+      .then((socket) => {
+        console.log("resolved");
+        socket.onopen = () => console.log('Connected');
+        socket.onmessage = (event) => {
+          setBuses(JSON.parse(event.data));
+        };
+        socket.onclose = () => console.log('Disconnected');
+      })
+      .catch((error) => {
+        setError(error.message);
+      });
   }, []);
 
   const getRoute = (routeId) => routes.find((r) => r.route_id == routeId);
@@ -60,7 +64,7 @@ function App() {
 
           <Marker key={bus.vehicle.id} position={pos(bus.position)}>
             <Popup>
-              <RouteInfo route={getRoute(bus.trip.routeId)}/>
+              <RouteInfo route={getRoute(bus.trip.routeId)} />
             </Popup>
           </Marker>
         )}
