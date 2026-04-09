@@ -109,3 +109,7 @@ code {
   padding: 4px 8px;
   background: var(--code-bg);
 }
+#map { height: 180px; }
+.leaflet-container {
+  height: 400px;
+}
