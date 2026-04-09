@@ -1,9 +1,12 @@
-import { useState, useEffect } from "react";
-
+import { useState, useEffect, } from "react";
+import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
+import { getSocket } from "./service/busSocket";
+import { RouteInfo } from "./component/RouteInfo";
 function App() {
   const [routes, setRoutes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [buses, setBuses] = useState([]);
 
   useEffect(() => {
     fetch("http://localhost:5000/api/routes/jyväskylä")
@@ -21,11 +24,28 @@ function App() {
       });
   }, []);
 
+  useEffect(() => {
+    getSocket()
+      .then((socket) => {
+        console.log("resolved");
+        socket.onopen = () => console.log('Connected');
+        socket.onmessage = (event) => {
+          setBuses(JSON.parse(event.data));
+        };
+        socket.onclose = () => console.log('Disconnected');
+      })
+      .catch((error) => {
+        setError(error.message);
+      });
+  }, []);
+
+  const getRoute = (routeId) => routes.find((r) => r.route_id == routeId);
+
+  const map_position = [62.24147, 25.72088];
   if (loading) return <div>Loading routes...</div>;
   if (error) return <div>Error: {error}</div>;
-
   return (
-    <div style={{ padding: "20px" }}>
+    <div>
       <h1>Waltti Routes in Jyväskylä</h1>
       <ul>
         {routes.map((route) => (
@@ -35,8 +55,25 @@ function App() {
           </li>
         ))}
       </ul>
+      <MapContainer center={map_position} zoom={13} scrollWheelZoom={false}>
+        <TileLayer
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+        />
+        {buses.map(bus =>
+
+          <Marker key={bus.vehicle.id} position={pos(bus.position)}>
+            <Popup>
+              <RouteInfo route={getRoute(bus.trip.routeId)} />
+            </Popup>
+          </Marker>
+        )}
+      </MapContainer>
+      <p> end</p>
     </div>
   );
 }
+
+const pos = ({ latitude, longitude }) => [latitude, longitude];
 
 export default App;

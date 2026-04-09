@@ -1,11 +1,17 @@
 const express = require("express");
 const cors = require("cors");
 const axios = require("axios");
+const fetch = require("node-fetch");
 const csv = require("csv-parser");
 const { Readable } = require("stream");
+const GtfsRealtimeBindings = require('gtfs-realtime-bindings');
+require('dotenv').config();
 
 const app = express();
-app.use(cors());
+const expressWs = require('express-ws')(app);
+app.use(cors())
+
+const API_KEY = process.env.API_KEY;
 
 const cityToAuthorityId = {
   jyväskylä: "209",
@@ -79,6 +85,49 @@ app.get("/api/routes/:city", async (req, res) => {
     res.status(500).json({ error: "Failed to load routes data." });
   }
 });
+
+app.ws("/api/bus", (ws, req) => {
+  console.log("WebSocket client connected");
+  ws.on("close", () => console.log("Client disconnected"));
+  ws.on("error", (err) => console.error("WebSocket error:", err));
+});
+const busSocket = expressWs.getWss('/api/bus');
+
+const fetchBuses = async () => {
+  const url = `https://data.waltti.fi/jyvaskyla/api/gtfsrealtime/v1.0/feed/vehicleposition`;
+  const response = await fetch(url, {
+      headers: {
+        "Authorization": `Basic ${API_KEY}`,
+      },
+    });
+
+  if (!response.ok) {
+    const error = new Error(`${response.url}: ${response.status} ${response.statusText}`);
+    error.response = response;
+    throw error;
+  }
+  const buffer = await response.arrayBuffer();
+  const feed = GtfsRealtimeBindings.transit_realtime.FeedMessage.decode(
+    new Uint8Array(buffer)
+  );
+  const entities = Array.from(feed.entity);
+  return vehicles = entities
+    .map((e) => e.vehicle);
+};
+
+const broadcastBuses = async (connections) => {
+  if (connections.length === 0) {
+    return;
+  }
+  try {
+    const buses = await fetchBuses();
+    connections.forEach(client => client.send(JSON.stringify(buses)));
+  } catch (error) {
+    console.log("error fetching buses: ",error);
+  }
+}
+
+setInterval(() => broadcastBuses(busSocket.clients), 2000);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
