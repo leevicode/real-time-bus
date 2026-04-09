@@ -1,7 +1,7 @@
 const BUS_URL = "ws://localhost:5000/api/bus";
 const MAX_TIMEOUT = 20000;
 
-const makeSocket = (callBacks: { resolve: (_: WebSocket) => void; reject: (_:any) => void; }, timeout: number) => {
+const makeSocket = (callBacks: { resolve: (_: WebSocket) => void; reject: (reason: unknown) => void; }, timeout: number) => {
     if (timeout > MAX_TIMEOUT) {
         callBacks.reject("Timed out");
         return;
@@ -9,7 +9,7 @@ const makeSocket = (callBacks: { resolve: (_: WebSocket) => void; reject: (_:any
     setTimeout(() => {
         try {
             callBacks.resolve(new WebSocket(BUS_URL))
-        } catch (error) {
+        } catch {
             makeSocket(callBacks, 2 * timeout);
         }
     }
