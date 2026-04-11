@@ -81,12 +81,12 @@ app.get("/api/routes/:city", async (req, res) => {
     const routes = await fetchRoutes(authorityId);
     routesCache[city] = routes;
     res.json(routes);
-  } catch (error) {
+  } catch {
     res.status(500).json({ error: "Failed to load routes data." });
   }
 });
 
-app.ws("/api/bus", (ws, req) => {
+app.ws("/api/bus", (ws) => {
   console.log("WebSocket client connected");
   ws.on("close", () => console.log("Client disconnected"));
   ws.on("error", (err) => console.error("WebSocket error:", err));
