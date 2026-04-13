@@ -4,12 +4,13 @@ const axios = require("axios");
 const fetch = require("node-fetch");
 const csv = require("csv-parser");
 const { Readable } = require("stream");
-const GtfsRealtimeBindings = require('gtfs-realtime-bindings');
-require('dotenv').config();
+const GtfsRealtimeBindings = require("gtfs-realtime-bindings");
+const path = require("path");
+require("dotenv").config();
 
 const app = express();
-const expressWs = require('express-ws')(app);
-app.use(cors())
+const expressWs = require("express-ws")(app);
+app.use(cors());
 
 const API_KEY = process.env.API_KEY;
 
@@ -91,28 +92,29 @@ app.ws("/api/bus", (ws) => {
   ws.on("close", () => console.log("Client disconnected"));
   ws.on("error", (err) => console.error("WebSocket error:", err));
 });
-const busSocket = expressWs.getWss('/api/bus');
+const busSocket = expressWs.getWss("/api/bus");
 
 const fetchBuses = async () => {
   const url = `https://data.waltti.fi/jyvaskyla/api/gtfsrealtime/v1.0/feed/vehicleposition`;
   const response = await fetch(url, {
-      headers: {
-        "Authorization": `Basic ${API_KEY}`,
-      },
-    });
+    headers: {
+      Authorization: `Basic ${API_KEY}`,
+    },
+  });
 
   if (!response.ok) {
-    const error = new Error(`${response.url}: ${response.status} ${response.statusText}`);
+    const error = new Error(
+      `${response.url}: ${response.status} ${response.statusText}`,
+    );
     error.response = response;
     throw error;
   }
   const buffer = await response.arrayBuffer();
   const feed = GtfsRealtimeBindings.transit_realtime.FeedMessage.decode(
-    new Uint8Array(buffer)
+    new Uint8Array(buffer),
   );
   const entities = Array.from(feed.entity);
-  return vehicles = entities
-    .map((e) => e.vehicle);
+  return (vehicles = entities.map((e) => e.vehicle));
 };
 
 const broadcastBuses = async (connections) => {
@@ -121,13 +123,19 @@ const broadcastBuses = async (connections) => {
   }
   try {
     const buses = await fetchBuses();
-    connections.forEach(client => client.send(JSON.stringify(buses)));
+    connections.forEach((client) => client.send(JSON.stringify(buses)));
   } catch (error) {
-    console.log("error fetching buses: ",error);
+    console.log("error fetching buses: ", error);
   }
-}
+};
 
 setInterval(() => broadcastBuses(busSocket.clients), 2000);
+
+app.use(express.static(path.join(__dirname, "dist")));
+
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "dist", "index.html"));
+});
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
