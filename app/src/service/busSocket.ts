@@ -1,4 +1,4 @@
-import { getApiBaseUrl} from "../apiUrl";
+import { getApiBaseUrl} from "./routeService";
 
 const BUS_URL = getApiBaseUrl() + "/api/bus";
 const MAX_TIMEOUT = 20000;

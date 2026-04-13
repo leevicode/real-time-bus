@@ -2,7 +2,7 @@ import { useState, useEffect, } from "react";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import { getSocket } from "./service/busSocket";
 import { RouteInfo } from "./component/RouteInfo";
-import { getApiBaseUrl } from "./apiUrl";
+import { getApiBaseUrl } from "./service/routeService";
 function App() {
   interface Route {
     route_id: string;
