@@ -2,6 +2,7 @@ import { useState, useEffect, } from "react";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import { getSocket } from "./service/busSocket";
 import { RouteInfo } from "./component/RouteInfo";
+import { getApiBaseUrl } from "./apiUrl";
 function App() {
   const [routes, setRoutes] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -9,7 +10,7 @@ function App() {
   const [buses, setBuses] = useState<any[]>([]);
 
   useEffect(() => {
-    fetch("http://localhost:5000/api/routes/jyväskylä")
+    fetch(getApiBaseUrl() + "/api/routes/jyväskylä")
       .then((res) => {
         if (!res.ok) throw new Error("Failed to fetch routes");
         return res.json();

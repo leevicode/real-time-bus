@@ -1,4 +1,6 @@
-const BUS_URL = "ws://localhost:5000/api/bus";
+import { getApiBaseUrl} from "../apiUrl";
+
+const BUS_URL = getApiBaseUrl() + "/api/bus";
 const MAX_TIMEOUT = 20000;
 
 const makeSocket = (callBacks: { resolve: (_: WebSocket) => void; reject: (reason: unknown) => void; }, timeout: number) => {
