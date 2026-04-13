@@ -4,10 +4,29 @@ import { getSocket } from "./service/busSocket";
 import { RouteInfo } from "./component/RouteInfo";
 import { getApiBaseUrl } from "./apiUrl";
 function App() {
-  const [routes, setRoutes] = useState<any[]>([]);
+  interface Route {
+    route_id: string;
+    route_short_name?: string;
+    route_long_name?: string;
+  }
+
+  interface Bus {
+    vehicle: {
+      id: string;
+    };
+    position: {
+      latitude: number;
+      longitude: number;
+    };
+    trip?: {
+      routeId: string;
+    };
+  }
+
+  const [routes, setRoutes] = useState<Route[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [buses, setBuses] = useState<any[]>([]);
+  const [buses, setBuses] = useState<Bus[]>([]);
 
   useEffect(() => {
     fetch(getApiBaseUrl() + "/api/routes/jyväskylä")
@@ -40,7 +59,7 @@ function App() {
       });
   }, []);
 
-  const getRoute = (routeId: any) => routes.find((r) => r.route_id == routeId);
+  const getRoute = (routeId: string) => routes.find((r) => r.route_id == routeId);
 
   const map_position: [number, number] = [62.24147, 25.72088];
   if (loading) return <div>Loading routes...</div>;
