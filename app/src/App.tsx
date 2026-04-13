@@ -3,10 +3,10 @@ import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import { getSocket } from "./service/busSocket";
 import { RouteInfo } from "./component/RouteInfo";
 function App() {
-  const [routes, setRoutes] = useState([]);
+  const [routes, setRoutes] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [buses, setBuses] = useState([]);
+  const [error, setError] = useState<string | null>(null);
+  const [buses, setBuses] = useState<any[]>([]);
 
   useEffect(() => {
     fetch("http://localhost:5000/api/routes/jyväskylä")
@@ -39,9 +39,9 @@ function App() {
       });
   }, []);
 
-  const getRoute = (routeId) => routes.find((r) => r.route_id == routeId);
+  const getRoute = (routeId: any) => routes.find((r) => r.route_id == routeId);
 
-  const map_position = [62.24147, 25.72088];
+  const map_position: [number, number] = [62.24147, 25.72088];
   if (loading) return <div>Loading routes...</div>;
   if (error) return <div>Error: {error}</div>;
   return (
@@ -74,6 +74,6 @@ function App() {
   );
 }
 
-const pos = ({ latitude, longitude }) => [latitude, longitude];
+const pos = ({ latitude, longitude }: { latitude: number; longitude: number }): [number, number] => [latitude, longitude];
 
 export default App;
