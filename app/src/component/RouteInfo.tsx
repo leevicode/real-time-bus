@@ -1,6 +1,6 @@
-const RouteInfo = ({ route }) => 
+const RouteInfo = ({ route }: { route?: { route_short_name?: string } }) => 
     <p>
-        {route ? route.route_short_name : "Bus"}
+        {route?.route_short_name ?? "Bus"}
     </p>
 
 export {RouteInfo}

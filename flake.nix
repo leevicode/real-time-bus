@@ -64,22 +64,18 @@
         };
 
         # Build the backend as a Nix derivation.
-        backend = pkgs.stdenv.mkDerivation {
+        backend = pkgs.buildNpmPackage {
           name = "backend";
           src = ./backend;
 
-          nativeBuildInputs = with pkgs; [
-            nodejs
-          ];
+          npmDepsHash = "sha256-kRFWCsBt7S1+12LfPWaWihoplB6l/vsIeDiao7E7ItI=";
+          dontNpmBuild = true;
 
-          HOME = "/tmp"; # CI compat
-
-          buildPhase = ''
-            runHook preBuild
-            npm ci
-            runHook postBuild
+          configurePhase = ''
+           runHook preConfigure
+           npm ci
+           runHook postConfigure
           '';
-
 
           installPhase = ''
             runHook preInstall
@@ -97,19 +93,13 @@ EOF
         };
 
         # Build the frontend as a Nix derivation.
-        app = pkgs.stdenv.mkDerivation {
+        app = pkgs.buildNpmPackage {
           name = "app";
           src = ./app;
-
-          nativeBuildInputs = with pkgs; [
-            nodejs
-          ];
-
-          HOME = "/tmp";  # CI compat
+          npmDepsHash = "sha256-G9H/1zTts0yXqCMy73GiWNbtAzNUiaDCFGfKoyF02Us=";
 
           buildPhase = ''
             runHook preBuild
-            npm ci
             npm run build
             runHook postBuild
           '';

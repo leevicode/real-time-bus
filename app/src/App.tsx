@@ -2,14 +2,34 @@ import { useState, useEffect, } from "react";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import { getSocket } from "./service/busSocket";
 import { RouteInfo } from "./component/RouteInfo";
+import { getApiBaseUrl } from "./service/routeService";
 function App() {
-  const [routes, setRoutes] = useState([]);
+  interface Route {
+    route_id: string;
+    route_short_name?: string;
+    route_long_name?: string;
+  }
+
+  interface Bus {
+    vehicle: {
+      id: string;
+    };
+    position: {
+      latitude: number;
+      longitude: number;
+    };
+    trip?: {
+      routeId?: string;
+    };
+  }
+
+  const [routes, setRoutes] = useState<Route[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [buses, setBuses] = useState([]);
+  const [error, setError] = useState<string | null>(null);
+  const [buses, setBuses] = useState<Bus[]>([]);
 
   useEffect(() => {
-    fetch("http://localhost:5000/api/routes/jyväskylä")
+    fetch(getApiBaseUrl() + "/api/routes/jyväskylä")
       .then((res) => {
         if (!res.ok) throw new Error("Failed to fetch routes");
         return res.json();
@@ -39,9 +59,9 @@ function App() {
       });
   }, []);
 
-  const getRoute = (routeId) => routes.find((r) => r.route_id == routeId);
+  const getRoute = (routeId: string) => routes.find((r) => r.route_id == routeId);
 
-  const map_position = [62.24147, 25.72088];
+  const map_position: [number, number] = [62.24147, 25.72088];
   if (loading) return <div>Loading routes...</div>;
   if (error) return <div>Error: {error}</div>;
   return (
@@ -60,20 +80,24 @@ function App() {
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
-        {buses.map(bus =>
-
+        {buses.map(bus => {
+          const routeId = bus.trip?.routeId;
+          if (!routeId) return null;
+          const route = getRoute(routeId);
+          return (
           <Marker key={bus.vehicle.id} position={pos(bus.position)}>
             <Popup>
-              <RouteInfo route={getRoute(bus.trip.routeId)} />
+              <RouteInfo route={route} />
             </Popup>
           </Marker>
-        )}
+          )
+        })}
       </MapContainer>
       <p> end</p>
     </div>
   );
 }
 
-const pos = ({ latitude, longitude }) => [latitude, longitude];
+const pos = ({ latitude, longitude }: { latitude: number; longitude: number }): [number, number] => [latitude, longitude];
 
 export default App;
