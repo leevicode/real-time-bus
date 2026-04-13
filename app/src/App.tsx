@@ -19,7 +19,7 @@ function App() {
       longitude: number;
     };
     trip?: {
-      routeId: string;
+      routeId?: string;
     };
   }
 
@@ -80,15 +80,18 @@ function App() {
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
-        {buses.map(bus =>
-          bus.trip && (
+        {buses.map(bus => {
+          const routeId = bus.trip?.routeId;
+          if (!routeId) return null;
+          const route = getRoute(routeId);
+          return (
           <Marker key={bus.vehicle.id} position={pos(bus.position)}>
             <Popup>
-              <RouteInfo route={getRoute(bus.trip.routeId)} />
+              <RouteInfo route={route} />
             </Popup>
           </Marker>
           )
-        )}
+        })}
       </MapContainer>
       <p> end</p>
     </div>
