@@ -81,12 +81,13 @@ function App() {
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
         {buses.map(bus =>
-
+          bus.trip && (
           <Marker key={bus.vehicle.id} position={pos(bus.position)}>
             <Popup>
               <RouteInfo route={getRoute(bus.trip.routeId)} />
             </Popup>
           </Marker>
+          )
         )}
       </MapContainer>
       <p> end</p>
