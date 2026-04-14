@@ -1,5 +1,5 @@
 import { useState, useEffect, } from "react";
-import { MapContainer, TileLayer, Marker, Popup, Polyline } from "react-leaflet";
+import { MapContainer, TileLayer, Marker, Polyline } from "react-leaflet";
 import { getSocket } from "./service/busSocket";
 import { getApiBaseUrl } from "./service/routeService";
 import type { Shape } from "./types/shape";
@@ -12,7 +12,7 @@ function App() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [buses, setBuses] = useState<Bus[]>([]);
-  const [selectedRouteShapes, setSelectedRouteShapes] = useState<Shape[]>([]);
+  const [selectedRouteShapes, setSelectedRouteShapes] = useState<Shape[] | null >(null);
 
   useEffect(() => {
     fetch(getApiBaseUrl() + "/api/routes/jyväskylä")
@@ -52,13 +52,13 @@ function App() {
   // Fetch shape points when a bus is clicked
   const fetchRouteShape = async (routeId: string) => {
     try {
-      const res = await fetch(`http://localhost:5000/api/shapes/jyväskylä/${routeId}`);
+      const res = await fetch(getApiBaseUrl() + `/api/shapes/jyväskylä/${routeId}`);
       if (!res.ok) throw new Error("Failed to load shape");
       const data = await res.json();
-      setSelectedRouteShapes(data.shapes || []);
+      setSelectedRouteShapes(data.shapes?.length ? data.shapes : null);
     } catch (err) {
       console.error("Shape fetch error:", err);
-      setSelectedRouteShapes([]);
+      setSelectedRouteShapes(null);
     }
   };
 
@@ -82,7 +82,7 @@ function App() {
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
-        {selectedRouteShapes.map((points, idx) => (
+        {selectedRouteShapes && selectedRouteShapes.map((points, idx) => (
   <Polyline key={idx} positions={points} color="blue" weight={4} opacity={0.7} />
         ))}
         {
