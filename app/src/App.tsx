@@ -5,6 +5,7 @@ import { getApiBaseUrl } from "./service/routeService";
 import type { Shape } from "./types/shape";
 import type { Route } from "./interfaces/route";
 import type { Bus } from "./interfaces/bus";
+import { BusPopup } from "./component/busPopup";
 
 function App() {
   const [routes, setRoutes] = useState<Route[]>([]);
@@ -97,16 +98,7 @@ function App() {
               position={[bus.position.latitude, bus.position.longitude]}
               eventHandlers={{ click: () => handleBusClick(bus) }}
             >
-              <Popup>
-                {route ? (
-                  <div>
-                    <strong>{route.route_short_name || "?"}</strong>
-                    {route.route_long_name && <span> – {route.route_long_name}</span>}
-                  </div>
-                ) : (
-                  <div>Route information not available</div>
-                )}
-              </Popup>
+              <BusPopup route={route} />
             </Marker>
           );
         })}
