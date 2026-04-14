@@ -1,4 +1,3 @@
-// src/components/BusPopup.tsx
 import { Popup } from "react-leaflet";
 import type { BusPopupProps } from "../interfaces/busPopupProps";
 
