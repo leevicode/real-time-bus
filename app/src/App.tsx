@@ -2,6 +2,7 @@ import { useState, useEffect, } from "react";
 import { MapContainer, TileLayer, Marker, Popup, Polyline } from "react-leaflet";
 import { getSocket } from "./service/busSocket";
 import { getApiBaseUrl } from "./service/routeService";
+import type { Shape } from "./types/shape";
 
 interface Route {
   route_id: string;
@@ -27,8 +28,7 @@ function App() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [buses, setBuses] = useState<Bus[]>([]);
-  const [selectedRouteShapes, setSelectedRouteShapes] = useState([]);
-  const [loadingShape, setLoadingShape] = useState(false);
+  const [selectedRouteShapes, setSelectedRouteShapes] = useState<Shape[]>([]);
 
   useEffect(() => {
     fetch(getApiBaseUrl() + "/api/routes/jyväskylä")
@@ -67,7 +67,6 @@ function App() {
 
   // Fetch shape points when a bus is clicked
   const fetchRouteShape = async (routeId: string) => {
-    setLoadingShape(true);
     try {
       const res = await fetch(`http://localhost:5000/api/shapes/jyväskylä/${routeId}`);
       if (!res.ok) throw new Error("Failed to load shape");
@@ -76,8 +75,6 @@ function App() {
     } catch (err) {
       console.error("Shape fetch error:", err);
       setSelectedRouteShapes([]);
-    } finally {
-      setLoadingShape(false);
     }
   };
 
@@ -104,11 +101,11 @@ function App() {
         {selectedRouteShapes.map((points, idx) => (
   <Polyline key={idx} positions={points} color="blue" weight={4} opacity={0.7} />
         ))}
-        {loadingShape && (
+        {
           <div style={{ position: "absolute", bottom: 10, left: 10, background: "white", padding: "4px 8px", borderRadius: 4, zIndex: 1000 }}>
             Loading route...
           </div>
-        )}
+        }
         {buses.map((bus) => {
           const route = bus.trip?.routeId ? getRoute(bus.trip.routeId) : undefined;
           return (
