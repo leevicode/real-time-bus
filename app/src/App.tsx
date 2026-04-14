@@ -3,25 +3,8 @@ import { MapContainer, TileLayer, Marker, Popup, Polyline } from "react-leaflet"
 import { getSocket } from "./service/busSocket";
 import { getApiBaseUrl } from "./service/routeService";
 import type { Shape } from "./types/shape";
-
-interface Route {
-  route_id: string;
-  route_short_name?: string;
-  route_long_name?: string;
-}
-
-interface Bus {
-  vehicle: {
-    id: string;
-  };
-  position: {
-    latitude: number;
-    longitude: number;
-  };
-  trip?: {
-    routeId: string;
-  };
-}
+import type { Route } from "./interfaces/route";
+import type { Bus } from "./interfaces/bus";
 
 function App() {
   const [routes, setRoutes] = useState<Route[]>([]);
