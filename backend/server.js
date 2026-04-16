@@ -7,6 +7,7 @@ const { Readable } = require("stream");
 const GtfsRealtimeBindings = require("gtfs-realtime-bindings");
 const path = require("path");
 require("dotenv").config();
+const AdmZip = require("adm-zip");
 
 const app = express();
 const expressWs = require("express-ws")(app);
@@ -20,49 +21,66 @@ const cityToAuthorityId = {
   oulu: "229",
 };
 
-const routesCache = {};
+const gtfsCache = {};
 
-// Download and parse routes.txt for a given authority ID.
-async function fetchRoutes(authorityId) {
+// Download and parses all required GTFS files for a city. Caches the result in memory.
+// Subsequent calls for the same city will return cached data.
+async function loadGtfsData(city, authorityId) {
+  if (gtfsCache[city]) {
+    return gtfsCache[city];
+  }
+
   const zipUrl = `https://tvv.fra1.digitaloceanspaces.com/${authorityId}.zip`;
-  try {
-    const response = await axios.get(zipUrl, { responseType: "arraybuffer" });
-    const zipBuffer = response.data;
+  const response = await axios.get(zipUrl, { responseType: "arraybuffer" });
+  const zip = new AdmZip(response.data);
 
-    // Extract routes.txt from the zip buffer.
-    const AdmZip = require("adm-zip");
-    const zip = new AdmZip(zipBuffer);
-    const routesEntry = zip.getEntry("routes.txt");
-    if (!routesEntry) {
-      throw new Error("routes.txt not found in zip");
-    }
-    const routesCsv = routesEntry.getData().toString("utf8");
-
-    // Parse CSV
-    const routes = [];
-    const stream = Readable.from(routesCsv);
-    await new Promise((resolve, reject) => {
+  // Helper to parse a CSV file from the zip
+  const parseCsvFile = (fileName) => {
+    const entry = zip.getEntry(fileName);
+    if (!entry) return null;
+    const content = entry.getData().toString("utf8");
+    const results = [];
+    const stream = Readable.from(content);
+    return new Promise((resolve, reject) => {
       stream
         .pipe(csv())
-        .on("data", (row) => {
-          routes.push({
-            route_id: row.route_id,
-            route_short_name: row.route_short_name,
-            route_long_name: row.route_long_name,
-            route_type: row.route_type,
-          });
-        })
-        .on("end", resolve)
+        .on("data", (row) => results.push(row))
+        .on("end", () => resolve(results))
         .on("error", reject);
     });
-    return routes;
-  } catch (error) {
-    console.error(
-      `Error fetching routes for authority ${authorityId}:`,
-      error.message,
-    );
-    throw error;
+  };
+
+  // Load all three files in parallel
+  const [routes, trips, shapesRaw] = await Promise.all([
+    parseCsvFile("routes.txt"),
+    parseCsvFile("trips.txt"),
+    parseCsvFile("shapes.txt"),
+  ]);
+
+  if (!routes) throw new Error("routes.txt not found in zip");
+  if (!trips) console.warn(`trips.txt missing for ${city} – shapes may not work`);
+  if (!shapesRaw) console.warn(`shapes.txt missing for ${city} – cannot draw routes`);
+
+  // Process shapes: group by shape_id and sort by sequence
+  const shapes = {};
+  if (shapesRaw) {
+    for (const row of shapesRaw) {
+      const shapeId = row.shape_id;
+      if (!shapes[shapeId]) shapes[shapeId] = [];
+      shapes[shapeId].push({
+        lat: parseFloat(row.shape_pt_lat),
+        lng: parseFloat(row.shape_pt_lon),
+        sequence: parseInt(row.shape_pt_sequence),
+      });
+    }
+    for (const shapeId in shapes) {
+      shapes[shapeId].sort((a, b) => a.sequence - b.sequence);
+    }
   }
+
+  const data = { routes, trips, shapes };
+  gtfsCache[city] = data;
+  return data;
 }
 
 // GET /api/routes/:city
@@ -73,17 +91,57 @@ app.get("/api/routes/:city", async (req, res) => {
     return res.status(400).json({ error: `City "${city}" not supported.` });
   }
 
-  // Return cached routes if available.
-  if (routesCache[city]) {
-    return res.json(routesCache[city]);
+  try {
+    const { routes } = await loadGtfsData(city, authorityId);
+    // Transform to the expected format
+    const formattedRoutes = routes.map(route => ({
+      route_id: route.route_id,
+      route_short_name: route.route_short_name,
+      route_long_name: route.route_long_name,
+      route_type: route.route_type,
+    }));
+    res.json(formattedRoutes);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to load routes data." });
+  }
+});
+
+// GET /api/shapes/:city/:routeId
+app.get("/api/shapes/:city/:routeId", async (req, res) => {
+  const city = req.params.city.toLowerCase();
+  const routeId = req.params.routeId;
+  const authorityId = cityToAuthorityId[city];
+  if (!authorityId) {
+    return res.status(400).json({ error: `City "${city}" not supported.` });
   }
 
   try {
-    const routes = await fetchRoutes(authorityId);
-    routesCache[city] = routes;
-    res.json(routes);
-  } catch {
-    res.status(500).json({ error: "Failed to load routes data." });
+    const { trips, shapes } = await loadGtfsData(city, authorityId);
+    if (!trips || !shapes) {
+      return res.status(404).json({ error: "Trips or shapes data missing for this city." });
+    }
+
+    // Find all shape_ids used by trips of this route
+    const routeTrips = trips.filter(t => t.route_id == routeId);
+    const shapeIds = [...new Set(routeTrips.map(t => t.shape_id).filter(id => id))];
+
+    // Collect points from all those shapes
+    // Collect each shape as its own polyline.
+    const shapesPoints = [];
+    for (const shapeId of shapeIds) {
+      if (shapes[shapeId]) {
+        shapesPoints.push(shapes[shapeId].map(p => [p.lat, p.lng]));
+      }
+    }
+
+    if (shapesPoints.length === 0) {
+      return res.status(404).json({ error: "No shape points found for this route." });
+    }
+    res.json({ shapes: shapesPoints });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to load route shape." });
   }
 });
 
@@ -98,7 +156,7 @@ const fetchBuses = async () => {
   const url = `https://data.waltti.fi/jyvaskyla/api/gtfsrealtime/v1.0/feed/vehicleposition`;
   const response = await fetch(url, {
     headers: {
-      Authorization: `Basic ${API_KEY}`,
+      "Authorization": `Basic ${API_KEY}`,
     },
   });
 
@@ -114,13 +172,11 @@ const fetchBuses = async () => {
     new Uint8Array(buffer),
   );
   const entities = Array.from(feed.entity);
-  return (vehicles = entities.map((e) => e.vehicle));
+  return entities.map((e) => e.vehicle);
 };
 
 const broadcastBuses = async (connections) => {
-  if (connections.length === 0) {
-    return;
-  }
+  if (connections.length === 0) return;
   try {
     const buses = await fetchBuses();
     connections.forEach((client) => client.send(JSON.stringify(buses)));
