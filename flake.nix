@@ -26,9 +26,9 @@
           ];
 
           shellHook = ''
-            if [ ! -d backend/node_modules ]; then
+            if [ ! -d server/node_modules ]; then
               echo "Installing backend dependencies..."
-              (cd backend && npm ci)
+              (cd server && npm ci)
             fi
 
             if [ ! -d app/node_modules ]; then
@@ -41,12 +41,12 @@
             echo "npm version: $(npm --version)"
             echo ""
             echo "Available services:"
-            echo "  • Backend:  cd backend && npm run dev"
+            echo "  • Backend:  cd server && npm run dev"
             echo "  • Frontend: cd app && npm run dev"
             echo ""
 
             # Add node_modules binaries to PATH.
-            export PATH="$PWD/backend/node_modules/.bin:$PWD/app/node_modules/.bin:$PATH"
+            export PATH="$PWD/server/node_modules/.bin:$PWD/app/node_modules/.bin:$PATH"
          '';
         };
 
@@ -58,34 +58,32 @@
 
           shellHook = ''
             echo "Installing dependencies..."
-            (cd backend && npm ci)
+            (cd server && npm ci)
             (cd app && npm ci)
           '';
         };
 
-        # Build the backend as a Nix derivation.
-        backend = pkgs.buildNpmPackage {
-          name = "backend";
-          src = ./backend;
+        # Build the backend server as a Nix derivation.
+        server = pkgs.buildNpmPackage {
+          name = "server";
+          src = ./server;
 
-          npmDepsHash = "sha256-kRFWCsBt7S1+12LfPWaWihoplB6l/vsIeDiao7E7ItI=";
-          dontNpmBuild = true;
+          npmDepsHash = "sha256-UmMHN4bZG8WQNtBB9pqb3wNZWsLGOMFxA2oQQIajnb8=";
 
-          configurePhase = ''
-           runHook preConfigure
-           npm ci
-           runHook postConfigure
+          buildPhase = ''
+           runHook preBuild
+           npm run build
+           runHook postBuild
           '';
 
           installPhase = ''
             runHook preInstall
-            mkdir -p $out
-            cp -r . $out/
-            mkdir -p "$out/bin"
+            mkdir -p $out/{lib,bin}
+            cp -r dist package.json node_modules $out/lib/
             cat > $out/bin/backend-server << EOF
-#!/bin/bash
-export NODE_PATH="$out/node_modules"
-exec ${nodejs}/bin/node $out/server.js
+#!/bin/sh
+export NODE_PATH="$out/lib/node_modules"
+exec ${nodejs}/bin/node $out/lib/dist/index.js
 EOF
             chmod +x $out/bin/backend-server
             runHook postInstall
@@ -122,7 +120,7 @@ EOF
 
         # Packages
         packages = {
-          inherit backend app;
+          inherit server app;
           default = app;
         };
 
@@ -145,11 +143,11 @@ EOF
               wantedBy = [ "multi-user.target" ];
 
               serviceConfig = {
-                ExecStart = "${backend}/bin/backend-server";
+                ExecStart = "${server}/bin/backend-server";
                 Restart = "always";
                 User = "nobody";
                 Environment = [ "PORT=${toString config.services.realtimebus.port}" ];
-                WorkingDirectory = "${backend}";
+                WorkingDirectory = "${server}";
               };
             };
           };
