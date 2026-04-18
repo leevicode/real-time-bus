@@ -2,13 +2,14 @@ import { useState, useEffect, } from "react";
 import { MapContainer, TileLayer, Marker, Polyline } from "react-leaflet";
 import { getSocket } from "./service/busSocket";
 import { getApiBaseUrl } from "./service/routeService";
-import type { Shape } from "./types/shape";
-import type { Route } from "./interfaces/route";
-import type { Bus } from "./interfaces/bus";
+import type { Shape } from "../../types/shape";
+import type { Route } from "../../types/route";
+import type { Bus } from "../../types/bus";
 import { BusPopup } from "./component/busPopup";
 
 function App() {
-  const [routes, setRoutes] = useState<Route[]>([]);
+  const [routes, setRoutes2] = useState<Route[]>([]);
+  const setRoutes = (a: Route[]) => { console.log(a); setRoutes2(a);};
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [buses, setBuses] = useState<Bus[]>([]);

@@ -1,98 +1,23 @@
 const express = require("express");
 const cors = require("cors");
-const axios = require("axios");
 const fetch = require("node-fetch");
-const csv = require("csv-parser");
-const { Readable } = require("stream");
 const GtfsRealtimeBindings = require("gtfs-realtime-bindings");
 const path = require("path");
-require("dotenv").config();
-const AdmZip = require("adm-zip");
-
 const app = express();
 const expressWs = require("express-ws")(app);
+const { Cities, getData } = require("./gfts.ts");
 app.use(cors());
-
+require("dotenv").config();
 const API_KEY = process.env.API_KEY;
-
-const cityToAuthorityId = {
-  jyväskylä: "209",
-  lahti: "223",
-  oulu: "229",
-};
-
-const gtfsCache = {};
-
-// Download and parses all required GTFS files for a city. Caches the result in memory.
-// Subsequent calls for the same city will return cached data.
-async function loadGtfsData(city, authorityId) {
-  if (gtfsCache[city]) {
-    return gtfsCache[city];
-  }
-
-  const zipUrl = `https://tvv.fra1.digitaloceanspaces.com/${authorityId}.zip`;
-  const response = await axios.get(zipUrl, { responseType: "arraybuffer" });
-  const zip = new AdmZip(response.data);
-
-  // Helper to parse a CSV file from the zip
-  const parseCsvFile = (fileName) => {
-    const entry = zip.getEntry(fileName);
-    if (!entry) return null;
-    const content = entry.getData().toString("utf8");
-    const results = [];
-    const stream = Readable.from(content);
-    return new Promise((resolve, reject) => {
-      stream
-        .pipe(csv())
-        .on("data", (row) => results.push(row))
-        .on("end", () => resolve(results))
-        .on("error", reject);
-    });
-  };
-
-  // Load all three files in parallel
-  const [routes, trips, shapesRaw] = await Promise.all([
-    parseCsvFile("routes.txt"),
-    parseCsvFile("trips.txt"),
-    parseCsvFile("shapes.txt"),
-  ]);
-
-  if (!routes) throw new Error("routes.txt not found in zip");
-  if (!trips) console.warn(`trips.txt missing for ${city} – shapes may not work`);
-  if (!shapesRaw) console.warn(`shapes.txt missing for ${city} – cannot draw routes`);
-
-  // Process shapes: group by shape_id and sort by sequence
-  const shapes = {};
-  if (shapesRaw) {
-    for (const row of shapesRaw) {
-      const shapeId = row.shape_id;
-      if (!shapes[shapeId]) shapes[shapeId] = [];
-      shapes[shapeId].push({
-        lat: parseFloat(row.shape_pt_lat),
-        lng: parseFloat(row.shape_pt_lon),
-        sequence: parseInt(row.shape_pt_sequence),
-      });
-    }
-    for (const shapeId in shapes) {
-      shapes[shapeId].sort((a, b) => a.sequence - b.sequence);
-    }
-  }
-
-  const data = { routes, trips, shapes };
-  gtfsCache[city] = data;
-  return data;
-}
 
 // GET /api/routes/:city
 app.get("/api/routes/:city", async (req, res) => {
   const city = req.params.city.toLowerCase();
-  const authorityId = cityToAuthorityId[city];
-  if (!authorityId) {
-    return res.status(400).json({ error: `City "${city}" not supported.` });
-  }
-
+  console.log(city);
   try {
-    const { routes } = await loadGtfsData(city, authorityId);
+    console.log("b4 await");
+    const { routes } = await getData(city);
+    console.log("after await");
     // Transform to the expected format
     const formattedRoutes = routes.map(route => ({
       route_id: route.route_id,
@@ -109,15 +34,11 @@ app.get("/api/routes/:city", async (req, res) => {
 
 // GET /api/shapes/:city/:routeId
 app.get("/api/shapes/:city/:routeId", async (req, res) => {
-  const city = req.params.city.toLowerCase();
   const routeId = req.params.routeId;
-  const authorityId = cityToAuthorityId[city];
-  if (!authorityId) {
-    return res.status(400).json({ error: `City "${city}" not supported.` });
-  }
+  const city = req.params.city.toLowerCase();
 
   try {
-    const { trips, shapes } = await loadGtfsData(city, authorityId);
+    const { trips, shapes } = await getData(city);
     if (!trips || !shapes) {
       return res.status(404).json({ error: "Trips or shapes data missing for this city." });
     }
@@ -176,7 +97,7 @@ const fetchBuses = async () => {
 };
 
 const broadcastBuses = async (connections) => {
-  if (connections.length === 0) return;
+  if (connections.size === 0) return;
   try {
     const buses = await fetchBuses();
     connections.forEach((client) => client.send(JSON.stringify(buses)));

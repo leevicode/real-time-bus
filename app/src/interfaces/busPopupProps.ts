@@ -1,4 +1,4 @@
-import type { Route } from "../interfaces/route";
+import type { Route } from "../../../types/route";
 
 export interface BusPopupProps {
   route?: Route;
