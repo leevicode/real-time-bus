@@ -15,6 +15,6 @@ jobs:
         with:
           github_access_token: ${{ secrets.GITHUB_TOKEN }}
       - name: Lint backend
-        run: nix develop --command bash -c "cd backend && npm run lint"
+        run: nix develop --command bash -c "cd server && npm run lint"
       - name: Lint frontend
         run: nix develop --command bash -c "cd app && npm run lint"
