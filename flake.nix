@@ -68,7 +68,7 @@
           name = "server";
           src = ./server;
 
-          npmDepsHash = "sha256-UmMHN4bZG8WQNtBB9pqb3wNZWsLGOMFxA2oQQIajnb8=";
+          npmDepsHash = "sha256-cLhRG1c3U6Sy0xDzjbX4LoKpCOb9NBzRnwiAGgdgv4o=";
 
           buildPhase = ''
            runHook preBuild
@@ -94,7 +94,7 @@ EOF
         app = pkgs.buildNpmPackage {
           name = "app";
           src = ./app;
-          npmDepsHash = "sha256-G9H/1zTts0yXqCMy73GiWNbtAzNUiaDCFGfKoyF02Us=";
+          npmDepsHash = "sha256-NzbrC12tRIrPgW7uis6eGpHUV4Yd16aGUA1bIZWmAUk=";
 
           buildPhase = ''
             runHook preBuild
