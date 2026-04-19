@@ -6,6 +6,7 @@ import type { Shape } from "./types/shape";
 import type { Route } from "./interfaces/route";
 import type { Bus } from "./interfaces/bus";
 import { BusPopup } from "./component/busPopup";
+import type { Point } from "./types/point";
 
 function App() {
   const [routes, setRoutes] = useState<Route[]>([]);
@@ -47,7 +48,7 @@ function App() {
 
   const getRoute = (routeId: string) => routes.find((r) => r.route_id == routeId);
 
-  const map_position: [number, number] = [62.24147, 25.72088];
+  const map_position: Point = [62.24147, 25.72088];
 
   // Fetch shape points when a bus is clicked
   const fetchRouteShape = async (routeId: string) => {
