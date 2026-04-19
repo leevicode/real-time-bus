@@ -24,15 +24,16 @@ export function createApp(apiKey: string) {
   app.use(express.json());
   const fetchData = cacheParam(fetchGftsData);
   const _shapeProcessor =
-    cacheParam(async (routeId: string) =>
-      cacheParam(async (tripsRaw: RawTrip[]) =>
-        cacheParam(async (shapesRaw: RawShape[]) =>
-          processShapes(routeId, tripsRaw, shapesRaw)
-        )));
+  /* C */ cacheParam(async (routeId: string) =>
+  /* A */ cacheParam(async (tripsRaw: RawTrip[]) =>
+  /* C */ cacheParam(async (shapesRaw: RawShape[]) =>
+  /* H */ processShapes(routeId, tripsRaw, shapesRaw)
+  /* E */ )));
   const shapeProcessor = async (a: string, b: RawTrip[], c: RawShape[]) => (await (await _shapeProcessor(a))(b))(c)
 
   // GET /api/routes/:city - returns array of routes for the city
   app.get('/api/routes/:city', async (req, res) => {
+    console.log("city");
     const city = req.params.city.toLowerCase();
     const authorityId = cityToAuthorityId[city];
     if (!authorityId) {
@@ -73,7 +74,7 @@ export function createApp(apiKey: string) {
         res.json({ shapes: shapes });
       } catch (err) {
         console.error(err);
-        res.status(400).json({error: err});
+        res.status(404).json({ error: err });
       }
     } catch (err) {
       console.error(`Failed to load shapes for route ${routeId} in ${city}:`, err);
