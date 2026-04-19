@@ -1,5 +1,10 @@
 import { RawBusPosition } from '../ingestion/gtfsRtIngestion';
 
+export type Point = [number, number];
+export type Shape = Point[]
+
+export interface BusPosition extends RawBusPosition {}
+
 export interface Route {
   route_id: string;
   route_short_name: string;
@@ -7,4 +12,3 @@ export interface Route {
   route_type: string;
 }
 
-export interface BusPosition extends RawBusPosition {}
