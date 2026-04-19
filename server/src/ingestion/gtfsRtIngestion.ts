@@ -1,6 +1,17 @@
 import fetch from 'node-fetch';
 import GtfsRealtimeBindings from 'gtfs-realtime-bindings';
-import { RawBusEntity, RawBusPosition } from '../types';
+
+export interface RawBusPosition {
+  trip?: { tripId?: string; startTime?: string; startDate?: string };
+  position?: { latitude?: number; longitude?: number; bearing?: number };
+  timestamp?: string;
+  bus?: { id?: string; label?: string };
+}
+
+export interface RawBusEntity {
+  id: string;
+  bus: RawBusPosition;
+}
 
 export async function fetchBusPositions(apiKey: string): Promise<RawBusEntity[]> {
   const url = 'https://data.waltti.fi/jyvaskyla/api/gtfsrealtime/v1.0/feed/vehicleposition';

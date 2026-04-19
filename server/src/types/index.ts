@@ -1,16 +1,4 @@
-export interface RawBusPosition {
-  trip?: { tripId?: string; startTime?: string; startDate?: string };
-  position?: { latitude?: number; longitude?: number; bearing?: number };
-  timestamp?: string;
-  bus?: { id?: string; label?: string };
-}
-
-export interface RawBusEntity {
-  id: string;
-  bus: RawBusPosition;
-}
-
-export interface BusPosition extends RawBusPosition {}
+import { RawBusPosition } from '../ingestion/gtfsRtIngestion';
 
 export interface Route {
   route_id: string;
@@ -18,3 +6,5 @@ export interface Route {
   route_long_name: string;
   route_type: string;
 }
+
+export interface BusPosition extends RawBusPosition {}
