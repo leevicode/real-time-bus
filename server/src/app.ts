@@ -4,9 +4,11 @@ import expressWs from 'express-ws';
 import path from 'path';
 import { WebSocket } from 'ws';
 import { fetchBusPositions } from './ingestion/gtfsRtIngestion';
-import { fetchRoutesFromZip } from './ingestion/staticGtfsIngestion';
+import { fetchGftsData } from './ingestion/staticGtfsIngestion';
 import { processVehicle } from './processing/busProcessor';
 import { processRoute } from './processing/routeProcessor';
+import { RawBusEntity, Route } from './types';
+import { cacheParam } from './cache/cache';
 
 const cityToAuthorityId: Record<string, string> = {
   jyväskylä: '209',
@@ -16,9 +18,10 @@ const cityToAuthorityId: Record<string, string> = {
 
 export function createApp(apiKey: string) {
   const app = express();
-  const wsInstance =expressWs(app);
+  const wsInstance = expressWs(app);
   app.use(cors());
   app.use(express.json());
+  const fetchData = cacheParam(fetchGftsData);
 
   app.get('/api/routes/:city', async (req, res) => {
     const city = req.params.city.toLowerCase();
@@ -28,9 +31,10 @@ export function createApp(apiKey: string) {
     }
 
     try {
-      const rawRoutes = await fetchRoutesFromZip(authorityId);
-      const processedRoutes = rawRoutes.map(processRoute);
-      res.json(processedRoutes);
+      const rawData = await fetchData(authorityId);
+      const routes = (await rawData.parse<Route[]>("routes.txt"))
+        .map(processRoute);
+      res.json(routes);
     } catch (err) {
       console.error(`Failed to load routes for ${city}:`, err);
       res.status(500).json({ error: 'Failed to load routes data.' });

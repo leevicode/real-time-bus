@@ -2,32 +2,30 @@ import axios from 'axios';
 import AdmZip from 'adm-zip';
 import csv from 'csv-parser';
 import { Readable } from 'stream';
-import { Route } from '../types';
 
-export async function fetchRoutesFromZip(authorityId: string): Promise<Route[]> {
+export interface Zip {
+  parse: <T>(name: string) => Promise<T>;
+}
+
+export async function fetchGftsData(authorityId: string): Promise<Zip> {
   const zipUrl = `https://tvv.fra1.digitaloceanspaces.com/${authorityId}.zip`;
   const response = await axios.get(zipUrl, { responseType: 'arraybuffer' });
-  const zip = new AdmZip(response.data);
-  const routesEntry = zip.getEntry('routes.txt');
-  if (!routesEntry) throw new Error('routes.txt not found in zip');
+  const zip: any = new AdmZip(response.data);
+  // Helper to parse a CSV file from the zip
+  zip.parse = (fileName: string) => {
+    const entry = zip.getEntry(fileName);
+    if (!entry) return null;
+    const content = entry.getData().toString("utf8");
+    const results: unknown[] = [];
+    const stream = Readable.from(content);
+    return new Promise((resolve, reject) => {
+      stream
+        .pipe(csv())
+        .on("data", (row: any) => results.push(row))
+        .on("end", () => resolve(results))
+        .on("error", reject);
+    });
 
-  const routesCsv = routesEntry.getData().toString('utf8');
-  const routes: Route[] = [];
-
-  await new Promise((resolve, reject) => {
-    Readable.from(routesCsv)
-      .pipe(csv())
-      .on('data', (row) => {
-        routes.push({
-          route_id: row.route_id,
-          route_short_name: row.route_short_name,
-          route_long_name: row.route_long_name,
-          route_type: row.route_type,
-        });
-      })
-      .on('end', resolve)
-      .on('error', reject);
-  });
-
-  return routes;
+  };
+  return zip;
 }
