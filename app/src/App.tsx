@@ -2,11 +2,12 @@ import { useState, useEffect, } from "react";
 import { MapContainer, TileLayer, Marker, Polyline } from "react-leaflet";
 import { getSocket } from "./service/busSocket";
 import { getApiBaseUrl } from "./service/routeService";
-import type { Shape } from "./types/shape";
 import type { Route } from "./interfaces/route";
-import type { Bus } from "./interfaces/bus";
 import { BusPopup } from "./component/busPopup";
-import type { Point } from "./types/point";
+import type { Shape } from '../../common/shape';
+import type { Bus } from '../../common/bus';
+import type { Point } from '../../common/point';
+
 
 function App() {
   const [routes, setRoutes] = useState<Route[]>([]);

@@ -1,5 +1,5 @@
-import { Zip, RawShape, RawTrip } from "../ingestion/staticGtfsIngestion";
-import { Shape } from "../types";
+import { RawShape, RawTrip } from "../ingestion/staticGtfsIngestion";
+import { Shape } from "@common/shape";
 
 export async function processShapes(routeId: string, trips: RawTrip[], shapesRaw: RawShape[]): Promise<Shape[]> {
       if (trips.length === 0) {
