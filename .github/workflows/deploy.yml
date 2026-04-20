@@ -3,6 +3,7 @@ name: Deploy
 on:
   push:
     branches: [main, dev]
+  workflow_dispatch:
 
 jobs:
   build-and-deploy:
@@ -16,7 +17,7 @@ jobs:
 
       - name: Build backend (Nix)
         run: |
-          nix build .#backend
+          nix build .#server
           mkdir deploy
           cp -rL result/* deploy/
           find deploy -type l -delete
