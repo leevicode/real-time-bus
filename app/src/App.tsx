@@ -8,6 +8,15 @@ import type { Bus } from "./interfaces/bus";
 import { BusPopup } from "./component/busPopup";
 import type { Point } from "./types/point";
 
+import { useMapEvents } from 'react-leaflet';
+
+function MapClickHandler({ onClick }: { onClick: () => void }) {
+  useMapEvents({
+    click: () => onClick(),
+  });
+  return null;
+}
+
 function App() {
   const [routes, setRoutes] = useState<Route[]>([]);
   const [loading, setLoading] = useState(true);
@@ -79,6 +88,7 @@ function App() {
     <div>
       <h1>Waltti Routes in Jyväskylä</h1>
       <MapContainer center={map_position} zoom={13} scrollWheelZoom={false}>
+        <MapClickHandler onClick={() => setSelectedRouteShapes(null)} />
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
