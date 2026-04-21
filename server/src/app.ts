@@ -7,8 +7,8 @@ import { fetchBusPositions } from './ingestion/gtfsRtIngestion';
 import { fetchGftsData, Zip, RawShape, RawTrip } from './ingestion/staticGtfsIngestion';
 import { processVehicle } from './processing/busProcessor';
 import { processRoute } from './processing/routeProcessor';
-import { Route } from './types';
-import { cache, cacheParam } from './cache/cache';
+import type { Route } from '../../common/route';
+import { cacheParam } from './cache/cache';
 import { processShapes } from './processing/shapeProcessor';
 
 const cityToAuthorityId: Record<string, string> = {
