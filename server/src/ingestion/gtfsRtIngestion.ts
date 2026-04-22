@@ -8,8 +8,6 @@ export interface RawBusPosition {
   bus?: { id?: string; label?: string };
 }
 
-export interface BusPosition extends RawBusPosition {}
-
 export interface RawBusEntity {
   id: string;
   bus: RawBusPosition;

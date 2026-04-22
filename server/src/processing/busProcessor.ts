@@ -1,4 +1,5 @@
-import { RawBusEntity, BusPosition } from '../ingestion/gtfsRtIngestion';
+import { RawBusEntity } from '../ingestion/gtfsRtIngestion';
+import { BusPosition } from '../types';
 
 // TODO add validation, filtering, enrichment here.
 export function processVehicle(raw: RawBusEntity): BusPosition {
