@@ -51,6 +51,114 @@ export function createApp(apiKey: string) {
     }
   });
 
+  // GET /api/stops/:city - returns array of stops for the city
+  app.get('/api/stops/:city', async (req, res) => {
+    const city = req.params.city.toLowerCase();
+    const authorityId = cityToAuthorityId[city];
+    if (!authorityId) {
+      return res.status(400).json({ error: `City "${city}" not supported.` });
+    }
+
+    try {
+      const rawData = await fetchData(authorityId);
+      const stopsRaw = await rawData.parse<any[]>("stops.txt");
+
+      // Filter to actual bus stops (location_type 0 or 1)
+      const stops = stopsRaw
+        .filter((stop: any) => stop.location_type === '0' || stop.location_type === '1')
+        .map((stop: any) => ({
+          id: stop.stop_id,
+          name: stop.stop_name,
+          lat: parseFloat(stop.stop_lat),
+          lon: parseFloat(stop.stop_lon),
+          code: stop.stop_code,
+          locationType: stop.location_type,
+        }));
+
+      res.json(stops);
+    } catch (err) {
+      console.error(`Failed to load stops for ${city}:`, err);
+      res.status(500).json({ error: 'Failed to load stops data.' });
+    }
+  });
+
+  // GET /api/stop-routes/:city/:stopId
+  app.get('/api/stop-routes/:city/:stopId', async (req, res) => {
+    const city = req.params.city.toLowerCase();
+    const stopId = req.params.stopId;
+    const authorityId = cityToAuthorityId[city];
+    if (!authorityId) {
+      return res.status(400).json({ error: `City "${city}" not supported.` });
+    }
+
+    try {
+      const rawData = await fetchData(authorityId);
+      const [stopTimesRaw, tripsRaw, routesRaw] = await Promise.all([
+        rawData.parse<any[]>("stop_times.txt"),
+        rawData.parse<any[]>("trips.txt"),
+        rawData.parse<Route[]>("routes.txt"),
+      ]);
+
+      // Find all trip_ids that stop at the given stop_id.
+      const myStopTimes = stopTimesRaw.filter(st => st.stop_id === stopId);
+      const tripIdsForStop = new Set(myStopTimes.map(st => st.trip_id));
+
+      // Map trip_id -> route_id.
+      const tripToRoute = new Map(tripsRaw.map(trip => [trip.trip_id, trip.route_id]));
+
+      // Collect unique route_ids.
+      const routeIds = new Set<string>();
+      for (const tripId of tripIdsForStop) {
+        const routeId = tripToRoute.get(tripId);
+        if (routeId) routeIds.add(routeId);
+      }
+
+      const now = new Date();
+      const currentMinutes = now.getHours() * 60 + now.getMinutes();
+
+      // GTFS time string helper.
+      const timeToMinutes = (timeStr: string): number => {
+        const [hours, minutes] = timeStr.split(':').map(Number);
+        return hours * 60 + minutes;
+      };
+
+      // For each route, find the earliest future arrival time at this stop.
+      const routeNextArrival = new Map<string, number>();
+
+      for (const st of myStopTimes) {
+        const tripId = st.trip_id;
+        const routeId = tripToRoute.get(tripId);
+        if (!routeId || !routeIds.has(routeId)) continue;
+
+        let tripMinutes = timeToMinutes(st.arrival_time);
+        // If the scheduled time is earlier than now, it's next day.
+        if (tripMinutes < currentMinutes) {
+          tripMinutes += 24 * 60;
+        }
+        const minsUntil = tripMinutes - currentMinutes;
+
+        const existing = routeNextArrival.get(routeId);
+        if (existing === undefined || minsUntil < existing) {
+          routeNextArrival.set(routeId, minsUntil);
+        }
+      }
+
+      const routes = routesRaw
+        .filter(route => routeIds.has(route.route_id))
+        .map(route => ({
+          route_id: route.route_id,
+          route_short_name: route.route_short_name,
+          route_long_name: route.route_long_name,
+          next_arrival_minutes: routeNextArrival.get(route.route_id) ?? null,
+        }));
+
+      res.json(routes);
+    } catch (err) {
+      console.error(`Failed to get routes for stop ${stopId} in ${city}:`, err);
+      res.status(500).json({ error: "Failed to load stop-routes data." });
+    }
+  });
+
   // GET /api/shapes/:city/:routeId - returns array of shape points for the route
   app.get('/api/shapes/:city/:routeId', async (req, res) => {
     const city = req.params.city.toLowerCase();
