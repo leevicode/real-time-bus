@@ -8,8 +8,9 @@ import { fetchGftsData, Zip, RawShape, RawTrip } from './ingestion/staticGtfsIng
 import { processVehicle } from './processing/busProcessor';
 import { processRoute } from './processing/routeProcessor';
 import { Route } from './types';
-import { cache, cacheParam } from './cache/cache';
+import { cacheParam } from './cache/cache';
 import { processShapes } from './processing/shapeProcessor';
+import { processStops, processStopRoutes } from './processing/stopProcessor';
 
 const cityToAuthorityId: Record<string, string> = {
   jyväskylä: '209',
@@ -62,19 +63,7 @@ export function createApp(apiKey: string) {
     try {
       const rawData = await fetchData(authorityId);
       const stopsRaw = await rawData.parse<any[]>("stops.txt");
-
-      // Filter to actual bus stops (location_type 0 or 1)
-      const stops = stopsRaw
-        .filter((stop: any) => stop.location_type === '0' || stop.location_type === '1')
-        .map((stop: any) => ({
-          id: stop.stop_id,
-          name: stop.stop_name,
-          lat: parseFloat(stop.stop_lat),
-          lon: parseFloat(stop.stop_lon),
-          code: stop.stop_code,
-          locationType: stop.location_type,
-        }));
-
+      const stops = processStops(stopsRaw);
       res.json(stops);
     } catch (err) {
       console.error(`Failed to load stops for ${city}:`, err);
@@ -99,63 +88,11 @@ export function createApp(apiKey: string) {
         rawData.parse<Route[]>("routes.txt"),
       ]);
 
-      // Find all trip_ids that stop at the given stop_id.
-      const myStopTimes = stopTimesRaw.filter(st => st.stop_id === stopId);
-      const tripIdsForStop = new Set(myStopTimes.map(st => st.trip_id));
-
-      // Map trip_id -> route_id.
-      const tripToRoute = new Map(tripsRaw.map(trip => [trip.trip_id, trip.route_id]));
-
-      // Collect unique route_ids.
-      const routeIds = new Set<string>();
-      for (const tripId of tripIdsForStop) {
-        const routeId = tripToRoute.get(tripId);
-        if (routeId) routeIds.add(routeId);
-      }
-
-      const now = new Date();
-      const currentMinutes = now.getHours() * 60 + now.getMinutes();
-
-      // GTFS time string helper.
-      const timeToMinutes = (timeStr: string): number => {
-        const [hours, minutes] = timeStr.split(':').map(Number);
-        return hours * 60 + minutes;
-      };
-
-      // For each route, find the earliest future arrival time at this stop.
-      const routeNextArrival = new Map<string, number>();
-
-      for (const st of myStopTimes) {
-        const tripId = st.trip_id;
-        const routeId = tripToRoute.get(tripId);
-        if (!routeId || !routeIds.has(routeId)) continue;
-
-        let tripMinutes = timeToMinutes(st.arrival_time);
-        // If the scheduled time is earlier than now, it's next day.
-        if (tripMinutes < currentMinutes) {
-          tripMinutes += 24 * 60;
-        }
-        const minsUntil = tripMinutes - currentMinutes;
-
-        const existing = routeNextArrival.get(routeId);
-        if (existing === undefined || minsUntil < existing) {
-          routeNextArrival.set(routeId, minsUntil);
-        }
-      }
-
-      const routes = routesRaw
-        .filter(route => routeIds.has(route.route_id))
-        .map(route => ({
-          route_id: route.route_id,
-          route_short_name: route.route_short_name,
-          route_long_name: route.route_long_name,
-          next_arrival_minutes: routeNextArrival.get(route.route_id) ?? null,
-        }));
-
+      const routes = processStopRoutes(stopId, stopTimesRaw, tripsRaw, routesRaw);
       res.json(routes);
     } catch (err) {
-      console.error(`Failed to get routes for stop ${stopId} in ${city}:`, err);
-      res.status(500).json({ error: "Failed to load stop-routes data." });
+      console.error(`Failed to load stop-routes for stop ${stopId} in ${city}:`, err);
+      res.status(500).json({ error: 'Failed to load stop-routes data.' });
     }
   });
 
