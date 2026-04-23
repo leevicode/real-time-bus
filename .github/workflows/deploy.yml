@@ -41,12 +41,6 @@ jobs:
           cd deploy
           zip -r ../deploy.zip .
 
-      - name: Upload deploy.zip as artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: deploy-package
-          path: deploy.zip
-
       - name: Deploy to Azure Web App (using publish profile)
         uses: azure/webapps-deploy@v3
         with:
