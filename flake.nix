@@ -80,6 +80,12 @@
             runHook preInstall
             mkdir -p $out/{lib,bin}
             cp -r dist package.json node_modules $out/lib/
+            cat > $out/bin/backend-server << EOF
+#!/bin/sh
+export NODE_PATH="$out/lib/node_modules"
+exec ${nodejs}/bin/node $out/lib/dist/index.js
+EOF
+            chmod +x $out/bin/backend-server
             runHook postInstall
           '';
         };
