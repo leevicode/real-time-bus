@@ -10,6 +10,3 @@ This folder contains individual use case documents for the Jyväskylä Realtime 
 | [UC-02](002-track-a-single-vehicle-in-detail.md) | Track a Single Vehicle in Detail | High |
 | [UC-03](003-see-service-alerts-for-a-route.md) | See Service Alerts for a Route | Medium |
 | [UC-04](004-search-for-a-route.md) | Search for a Route | Medium |
-| [UC-05](005-handle-degraded-data.md) | Handle Degraded Data Gracefully | High |
-
-See [summary-table.md](summary-table.md) for a full overview.
