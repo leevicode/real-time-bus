@@ -15,6 +15,9 @@ jobs:
         with:
           github_access_token: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Clear Nix cache for this derivation
+        run: nix-collect-garbage -d && nix store delete $(nix path-info .#server) || true
+
       - name: Build backend (Nix)
         run: |
           nix build .#server
