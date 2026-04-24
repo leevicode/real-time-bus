@@ -1,6 +1,7 @@
 # 006 Host on Azure App Service
 
 Date: 11.4.2026
+Authors: Development Team
 
 ## Status
 Accepted

@@ -2,6 +2,7 @@
 
 Date: 30.3.2026 (Original)
 Last Amended: 11.4.2026
+Authors: Development Team
 
 ## Status
 Accepted (Amended)
