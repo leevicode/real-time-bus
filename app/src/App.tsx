@@ -33,7 +33,7 @@ function App() {
     // Already fetched.
     if (stopRoutes[stopId]) return;
     try {
-      const res = await fetch(`${getApiBaseUrl()}/api/stop-routes/jyväskylä/${stopId}`);
+      const res = await fetch(`${getApiBaseUrl()}/api/stops/stop-routes/jyväskylä/${stopId}`);
       if (!res.ok) throw new Error();
       const routes = await res.json() as StopRouteInfo[];
       setStopRoutes((prev: Record<string, StopRouteInfo[]>) => ({ ...prev, [stopId]: routes }));
