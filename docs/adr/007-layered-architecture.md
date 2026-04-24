@@ -1,7 +1,7 @@
 # ADR-007: Layered Architecture for Data Processing
 
 **Date:** 2026-04-22
-**Status:** Proposed
+**Status:** Accepted
 **Related:** ADR-005 (Nix/NixOS CI/CD)
 **Deciders:** Development Team
 
@@ -17,51 +17,37 @@ The assignment also explicitly recommends a layered architecture with separated 
 
 ## Decision
 
-We will organize the backend into three clearly separated layers:
+We organized the backend into four clearly separated layers, all located under `server/src/`:
 
 ### Layer 1 — Data Ingestion
+**Status:** Accepted
 **Location:** `server/src/ingestion/`
 **Responsibility:** Fetch raw GTFS Realtime protobuf data from external feeds. Nothing else.
 **Rules:**
-- Only allowed to make HTTP requests and return raw feed data
-- No parsing, no business logic
-- Handles retries and timeouts
-
-```
-server/src/ingestion/
-└── gtfsClient.ts       # Fetches vehicle positions, trip updates, alerts
-```
+- Only allowed to make HTTP requests and return raw feed data.
+- No parsing, no business logic.
+- Handles retries and timeouts.
 
 ### Layer 2 — Processing
+**Status:** Accepted
 **Location:** `server/src/processing/`
 **Responsibility:** Parse raw protobuf data into clean domain objects. Apply business rules (staleness detection, data validation, delay calculation).
 **Rules:**
-- No HTTP calls
-- No direct UI concerns
-- Outputs strongly typed domain objects
-
-```
-server/src/processing/
-├── vehicleParser.ts    # Parses VehiclePosition feed
-├── tripParser.ts       # Parses TripUpdate feed
-├── alertParser.ts      # Parses ServiceAlert feed
-└── freshnessChecker.ts # Flags stale or missing data
-```
+- No HTTP calls.
+- No direct UI concerns.
+- Outputs strongly typed domain objects defined in `server/src/types/`.
 
 ### Layer 3 — Application / API
-**Location:** `server/src/api/`
+**Status:** Accepted
+**Location:** `server/src/app.ts`, `server/src/index.ts`
 **Responsibility:** Expose processed data to the frontend via REST endpoints. Handle request/response formatting.
 **Rules:**
-- No direct GTFS parsing
-- No raw HTTP calls to external feeds
-- Calls processing layer only
+- No direct GTFS parsing.
+- No raw HTTP calls to external feeds.
+- Calls processing layer only.
 
-```
-server/src/api/
-└── routes.ts           # GET /vehicles/:routeId, GET /alerts/:routeId
-```
-
-### Optional — Cache Layer
+### Cache Layer
+**Status:** Accepted
 **Location:** `server/src/cache/`
 **Responsibility:** Store the last successful fetch result. Serve cached data when the feed is temporarily unreachable.
 
@@ -70,15 +56,15 @@ server/src/api/
 ## Consequences
 
 **Positive:**
-- Each layer can be tested in isolation (unit tests for processing, integration tests for ingestion)
-- Easy to swap data sources or add new feeds without touching UI code
-- Clear ownership: team members can work on different layers without conflicts
-- Meets assignment requirement for separated concerns
-- Compatible with Nix build system (ADR-005)
+- Each layer can be tested in isolation (unit tests for processing, integration tests for ingestion).
+- Easy to swap data sources or add new feeds without touching UI code.
+- Clear ownership: team members can work on different layers without conflicts.
+- Meets assignment requirement for separated concerns.
+- Compatible with Nix build system (ADR-005).
 
 **Negative:**
-- Slightly more files and boilerplate upfront
-- Need to agree on shared domain types/interfaces between layers
+- Slightly more files and boilerplate upfront.
+- Shared domain types managed separately in `server/src/types/`.
 
 ---
 
@@ -86,6 +72,6 @@ server/src/api/
 
 | Alternative | Reason Rejected |
 |---|---|
-| Single file fetching + parsing + serving | Hard to test, violates separation of concerns |
-| Microservices per feed | Overkill for a course project team of 4 |
-| No backend, frontend calls GTFS directly | CORS restrictions, security, no server-side caching possible |
+| Single file fetching + parsing + serving | Hard to test, violates separation of concerns. |
+| Microservices per feed | Overkill for a course project team of 4. |
+| No backend, frontend calls GTFS directly | CORS restrictions, security, no server-side caching possible. |
