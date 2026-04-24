@@ -1,5 +1,5 @@
 import { useState, useEffect, } from "react";
-import { MapContainer, TileLayer, Marker, Polyline, Popup, CircleMarker } from "react-leaflet";
+import { MapContainer, TileLayer, Marker, Polyline} from "react-leaflet";
 import { getSocket } from "./service/busSocket";
 import { getApiBaseUrl } from "./service/routeService";
 import type { Shape } from "./types/shape";
@@ -11,6 +11,7 @@ import { BusPopup } from "./component/busPopup";
 import type { Point } from "./types/point";
 
 import { useMapEvents } from 'react-leaflet';
+import { StopPopup } from "./component/stopPopup.";
 
 function MapClickHandler({ onClick }: { onClick: () => void }) {
   useMapEvents({
@@ -24,7 +25,7 @@ function App() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [buses, setBuses] = useState<Bus[]>([]);
-  const [selectedRouteShapes, setSelectedRouteShapes] = useState<Shape[] | null >(null);
+  const [selectedRouteShapes, setSelectedRouteShapes] = useState<Shape[] | null>(null);
   const [stops, setStops] = useState<Stop[]>([]);
   const [stopRoutes, setStopRoutes] = useState<Record<string, StopRouteInfo[]>>({});
 
@@ -125,7 +126,7 @@ function App() {
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
         {selectedRouteShapes && selectedRouteShapes.map((points, idx) => (
-  <Polyline key={idx} positions={points} color="blue" weight={4} opacity={0.7} />
+          <Polyline key={idx} positions={points} color="blue" weight={4} opacity={0.7} />
         ))}
         {
           <div style={{ position: "absolute", bottom: 10, left: 10, background: "white", padding: "4px 8px", borderRadius: 4, zIndex: 1000 }}>
@@ -134,53 +135,14 @@ function App() {
         }
 
         {stops.map((stop) => (
-          <CircleMarker
+          <StopPopup
             key={stop.id}
-            center={[stop.lat, stop.lon]}
-            radius={6}
-            fillColor="green"
-            color="darkgreen"
-            weight={2}
-            opacity={0.8}
-            fillOpacity={0.7}
-            eventHandlers={{
-              click: () => fetchStopRoutes(stop.id)
-            }}
-          >
-          <Popup>
-          <div>
-            <strong>{stop.name}</strong>
-              {stopRoutes[stop.id] && (() => {
-                // Filter routes with next_arrival_minutes < 60 (less than 1 hour)
-                const upcomingRoutes = stopRoutes[stop.id]
-                  .filter((route: StopRouteInfo) => route.next_arrival_minutes !== null && route.next_arrival_minutes < 60)
-                  .sort((a: StopRouteInfo, b: StopRouteInfo) => (a.next_arrival_minutes as number) - (b.next_arrival_minutes as number));
-
-                if (upcomingRoutes.length === 0) {
-                  return <div style={{ marginTop: "8px" }}>No buses arriving within the next hour</div>;
-                }
-
-                return (
-                  <div style={{ marginTop: "8px" }}>
-                    <strong>Routes & next bus:</strong>
-                    <ul style={{ margin: "4px 0 0 0", paddingLeft: "16px" }}>
-                      {upcomingRoutes.map((route: StopRouteInfo) => (
-                        <li key={route.route_id}>
-                          {route.route_short_name || route.route_long_name}
-                          <span style={{ marginLeft: "8px", color: "#555", fontSize: "0.9em" }}>
-                            → {route.next_arrival_minutes} min
-                          </span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                );
-              })()}
-              {!stopRoutes[stop.id] && <div>Click to load routes…</div>}
-            </div>
-          </Popup>
-        </CircleMarker>
-        ))}
+            stop={stop}
+            onStopClick={() => fetchStopRoutes(stop.id)}
+            onRouteClick={fetchRouteShape}
+            stopRoutes={stopRoutes}
+          />)
+        )}
 
         {buses.map((bus) => {
           const route = bus.trip?.routeId ? getRoute(bus.trip.routeId) : undefined;

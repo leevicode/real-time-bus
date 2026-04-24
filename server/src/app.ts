@@ -10,7 +10,7 @@ import { processRoute } from './processing/routeProcessor';
 import { Route } from './types';
 import { cacheParam } from './cache/cache';
 import { processShapes } from './processing/shapeProcessor';
-import { processStops, processStopRoutes, RawStop} from './processing/stopProcessor';
+import { processStops, processStopRoutes, RawStop, RawStopTime } from './processing/stopProcessor';
 
 const cityToAuthorityId: Record<string, string> = {
   jyväskylä: '209',
@@ -83,8 +83,8 @@ export function createApp(apiKey: string) {
     try {
       const rawData = await fetchData(authorityId);
       const [stopTimesRaw, tripsRaw, routesRaw] = await Promise.all([
-        rawData.parse<any[]>("stop_times.txt"),
-        rawData.parse<any[]>("trips.txt"),
+        rawData.parse<RawStopTime[]>("stop_times.txt"),
+        rawData.parse<RawTrip[]>("trips.txt"),
         rawData.parse<Route[]>("routes.txt"),
       ]);
 
