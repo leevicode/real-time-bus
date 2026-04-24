@@ -10,7 +10,7 @@ import { processRoute } from './processing/routeProcessor';
 import { Route } from './types';
 import { cacheParam } from './cache/cache';
 import { processShapes } from './processing/shapeProcessor';
-import { processStops, processStopRoutes, RawStopTime } from './processing/stopProcessor';
+import { processStops, processStopRoutes, RawStop, RawStopTime } from './processing/stopProcessor';
 
 const cityToAuthorityId: Record<string, string> = {
   jyväskylä: '209',
@@ -62,7 +62,7 @@ export function createApp(apiKey: string) {
 
     try {
       const rawData = await fetchData(authorityId);
-      const stopsRaw = await rawData.parse<any[]>("stops.txt");
+      const stopsRaw = await rawData.parse<RawStop[]>("stops.txt");
       const stops = processStops(stopsRaw);
       res.json(stops);
     } catch (err) {
@@ -152,9 +152,9 @@ export function createApp(apiKey: string) {
   // Broadcast every 2 seconds
   const interval = setInterval(broadcastBuses, 2000);
 
-  app.use(express.static(path.join(__dirname, '../dist')));
+  app.use(express.static(path.join(__dirname, '../../dist')));
   app.get(/.*/, (req, res) => {
-    res.sendFile(path.join(__dirname, '../dist', 'index.html'));
+    res.sendFile(path.join(__dirname, '../../dist', 'index.html'));
   });
 
   (app as any).cleanup = () => clearInterval(interval);
