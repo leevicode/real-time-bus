@@ -1,6 +1,6 @@
 # UC-02: Track a Single Vehicle in Detail
 
-**Status:** Proposed
+**Status:** Accepted
 **Actor:** Commuter waiting at a stop.
 **Goal:** Follow one specific vehicle and see its progress along the route.
 
