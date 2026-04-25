@@ -1,8 +1,7 @@
 # ADR-007: Layered Architecture for Data Processing
 
 **Date:** 2026-04-22
-**Status:** Accepted
-**Related:** ADR-005 (Nix/NixOS CI/CD)
+**Status:** Partially Accepted
 **Deciders:** Development Team
 
 ---
@@ -17,7 +16,7 @@ The assignment also explicitly recommends a layered architecture with separated 
 
 ## Decision
 
-We organized the backend into four clearly separated layers, all located under `server/src/`:
+We will organize the backend into three clearly separated layers:
 
 ### Layer 1 — Data Ingestion
 **Status:** Accepted
@@ -28,6 +27,11 @@ We organized the backend into four clearly separated layers, all located under `
 - No parsing, no business logic.
 - Handles retries and timeouts.
 
+```
+server/src/ingestion/
+└── gtfsClient.ts       # Fetches vehicle positions, trip updates, alerts
+```
+
 ### Layer 2 — Processing
 **Status:** Accepted
 **Location:** `server/src/processing/`
@@ -35,16 +39,28 @@ We organized the backend into four clearly separated layers, all located under `
 **Rules:**
 - No HTTP calls.
 - No direct UI concerns.
-- Outputs strongly typed domain objects defined in `server/src/types/`.
+- Outputs strongly typed domain objects.
+
+```
+server/src/processing/
+├── vehicleParser.ts    # Parses VehiclePosition feed
+├── tripParser.ts       # Parses TripUpdate feed
+└── alertParser.ts      # Parses ServiceAlert feed
+```
 
 ### Layer 3 — Application / API
-**Status:** Accepted
-**Location:** `server/src/app.ts`, `server/src/index.ts`
+**Status:** Proposed
+**Location:** `server/src/api/`
 **Responsibility:** Expose processed data to the frontend via REST endpoints. Handle request/response formatting.
 **Rules:**
 - No direct GTFS parsing.
 - No raw HTTP calls to external feeds.
 - Calls processing layer only.
+
+```
+server/src/api/
+└── routes.ts           # GET /vehicles/:routeId, GET /alerts/:routeId
+```
 
 ### Cache Layer
 **Status:** Accepted
@@ -60,11 +76,10 @@ We organized the backend into four clearly separated layers, all located under `
 - Easy to swap data sources or add new feeds without touching UI code.
 - Clear ownership: team members can work on different layers without conflicts.
 - Meets assignment requirement for separated concerns.
-- Compatible with Nix build system (ADR-005).
 
 **Negative:**
 - Slightly more files and boilerplate upfront.
-- Shared domain types managed separately in `server/src/types/`.
+- Need to agree on shared domain types/interfaces between layers.
 
 ---
 
