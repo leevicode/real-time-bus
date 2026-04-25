@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Uploaded to: SVG Repo, www.svgrepo.com, Generator: SVG Repo Mixer Tools -->
+
+<svg
+   width="800px"
+   height="800px"
+   viewBox="0 0 24 24"
+   version="1.1"
+   id="svg373"
+   sodipodi:docname="s.svg"
+   inkscape:version="1.2.2 (b0a8486541, 2022-12-01)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:dc="http://purl.org/dc/elements/1.1/">
+  <defs
+     id="defs377" />
+  <sodipodi:namedview
+     id="namedview375"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     showgrid="false"
+     inkscape:zoom="1.0775"
+     inkscape:cx="380.97448"
+     inkscape:cy="440.83527"
+     inkscape:window-width="1920"
+     inkscape:window-height="1008"
+     inkscape:window-x="0"
+     inkscape:window-y="1080"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="页面-1" />
+  <title
+     id="title366">bus_2_line</title>
+  <g
+     id="页面-1"
+     stroke="none"
+     stroke-width="1"
+     fill="none"
+     fill-rule="evenodd"
+     style="stroke-width:0.99999;stroke-dasharray:none">
+    <rect
+       style="fill:#3282f9;fill-opacity:1;stroke:none;stroke-width:1.0187;stroke-dasharray:none;stroke-opacity:1;paint-order:markers fill stroke"
+       id="rect6283"
+       width="19.539703"
+       height="11.34028"
+       x="2.0963492"
+       y="6.6976228"
+       ry="1.7736604" />
+    <g
+       id="bus_2_line"
+       style="stroke-width:0.99999;stroke-dasharray:none">
+      <path
+         d="M 24,0 V 24 H 0 V 0 Z m -11.40651,23.257841 -0.01155,0.0017 -0.07106,0.03553 -0.019,0.0037 v 0 l -0.01516,-0.0037 -0.07106,-0.03553 c -0.0098,-0.0031 -0.01861,-4.89e-4 -0.02351,0.0054 l -0.0041,0.01092 -0.01709,0.427279 0.005,0.02039 0.01101,0.01222 0.103573,0.07398 0.01487,0.0039 v 0 l 0.01177,-0.0039 0.103575,-0.07398 0.0126,-0.01604 v 0 l 0.0034,-0.01656 -0.01709,-0.427279 c -0.002,-0.01013 -0.0085,-0.01653 -0.01607,-0.01799 z m 0.264901,-0.112555 -0.01384,0.002 -0.184705,0.09235 -0.01,0.01024 v 0 l -0.0027,0.01121 0.0179,0.429528 0.0048,0.01278 v 0 l 0.0085,0.0071 0.200954,0.09275 c 0.01209,0.0037 0.02289,-2.52e-4 0.02849,-0.008 l 0.004,-0.01406 -0.03415,-0.614631 c -0.0024,-0.01194 -0.01027,-0.01953 -0.01929,-0.02125 z m -0.715344,0.002 c -0.0098,-0.0049 -0.02087,-0.002 -0.02741,0.0053 l -0.0057,0.01394 -0.03415,0.614631 c -6.39e-4,0.0115 0.007,0.0207 0.01688,0.0234 l 0.01561,-0.0013 0.200955,-0.09275 0.0094,-0.0081 v 0 l 0.0039,-0.0118 0.0179,-0.429528 -0.0032,-0.01259 v 0 l -0.0095,-0.0089 z"
+         id="MingCute"
+         fill-rule="nonzero"
+         style="stroke-width:0.99999;stroke-dasharray:none" />
+      <path
+         d="M 4,5 C 2.34315,5 1,6.34315 1,8 v 8 c 0,1.1046 0.89543,2 2,2 H 3.17071 C 3.58254,19.1652 4.69378,20 6,20 7.30622,20 8.41746,19.1652 8.82929,18 h 6.34141 c 0.4118,1.1652 1.5231,2 2.8293,2 1.3062,0 2.4175,-0.8348 2.8293,-2 H 21 c 1.1046,0 2,-0.8954 2,-2 V 9.60555 C 23,9.01328 22.8247,8.43425 22.4962,7.94145 L 21.4258,6.3359 C 20.8694,5.5013 19.9327,5 18.9296,5 Z M 3,8 C 3,7.44772 3.44772,7 4,7 h 2 v 3 H 3 Z M 11,7 H 8 v 3 h 3 z m 2,3 h 3 V 7 H 13 Z M 3,12 v 4 H 3.17071 C 3.58254,14.8348 4.69378,14 6,14 c 1.30622,0 2.41746,0.8348 2.82929,2 h 6.34141 c 0.4118,-1.1652 1.5231,-2 2.8293,-2 1.3062,0 2.4175,0.8348 2.8293,2 H 21 v -3 h -3 c -0.7403,0 -1.3866,-0.4022 -1.7324,-1 z M 21,11 V 9.60555 C 21,9.40813 20.9416,9.21512 20.8321,9.05085 L 19.7617,7.4453 C 19.5762,7.1671 19.264,7 18.9296,7 H 18 v 4 z m -3,5 c 0.5523,0 1,0.4477 1,1 0,0.5523 -0.4477,1 -1,1 -0.5523,0 -1,-0.4477 -1,-1 0,-0.5523 0.4477,-1 1,-1 z M 7,17 c 0,-0.5523 -0.44772,-1 -1,-1 -0.55228,0 -1,0.4477 -1,1 0,0.5523 0.44772,1 1,1 0.55228,0 1,-0.4477 1,-1 z"
+         id="形状"
+         fill="#09244b"
+         style="stroke-width:0.99999;stroke-dasharray:none;fill:#46457e;fill-opacity:1" />
+    </g>
+  </g>
+  <metadata
+     id="metadata2025">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:title>bus_2_line</dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+</svg>

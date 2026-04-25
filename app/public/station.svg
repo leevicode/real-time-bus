@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Uploaded to: SVG Repo, www.svgrepo.com, Generator: SVG Repo Mixer Tools -->
+
+<svg
+   fill="#000000"
+   height="800px"
+   width="800px"
+   version="1.1"
+   id="Layer_1"
+   viewBox="0 0 512 512"
+   xml:space="preserve"
+   sodipodi:docname="station.svg"
+   inkscape:version="1.2.2 (b0a8486541, 2022-12-01)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg"><defs
+   id="defs79" /><sodipodi:namedview
+   id="namedview77"
+   pagecolor="#ffffff"
+   bordercolor="#000000"
+   borderopacity="0.25"
+   inkscape:showpageshadow="2"
+   inkscape:pageopacity="0.0"
+   inkscape:pagecheckerboard="0"
+   inkscape:deskcolor="#d1d1d1"
+   showgrid="false"
+   inkscape:zoom="1.1198253"
+   inkscape:cx="380.86298"
+   inkscape:cy="342.01764"
+   inkscape:window-width="1920"
+   inkscape:window-height="1008"
+   inkscape:window-x="0"
+   inkscape:window-y="1080"
+   inkscape:window-maximized="1"
+   inkscape:current-layer="Layer_1" />
+<rect
+   style="fill:#886c10;stroke-width:21.3331;paint-order:markers fill stroke;fill-opacity:1"
+   id="rect360"
+   width="20.385094"
+   height="283.18668"
+   x="28.703787"
+   y="123.41137"
+   ry="10.192547" /><rect
+   style="fill:#886c10;stroke-width:21.3331;paint-order:markers fill stroke;fill-opacity:1"
+   id="rect362"
+   width="487.69812"
+   height="16.504725"
+   x="12.454502"
+   y="409.77747"
+   ry="8.2523623" /><rect
+   style="fill:#886c10;stroke-width:21.3331;paint-order:markers fill stroke;fill-opacity:1"
+   id="rect364"
+   width="390.16599"
+   height="23.367746"
+   x="20.172338"
+   y="86.868721"
+   ry="8.2523623" /><rect
+   style="fill:#886c10;stroke-width:21.3331;paint-order:markers fill stroke;fill-opacity:1"
+   id="rect366"
+   width="20.450609"
+   height="282.7894"
+   x="380.61606"
+   y="123.51695"
+   ry="8.2523623" /><rect
+   style="fill:#886c10;stroke-width:21.3331;paint-order:markers fill stroke;fill-opacity:1"
+   id="rect368"
+   width="20.247858"
+   height="113.7831"
+   x="206.44321"
+   y="117.1708"
+   ry="8.2523623" /><rect
+   style="fill:#57e5eb;fill-opacity:1;stroke-width:21.3331;paint-order:markers fill stroke"
+   id="rect977"
+   width="332.1384"
+   height="117.73879"
+   x="50.15443"
+   y="117.29885"
+   ry="8.2523623" /><rect
+   style="fill:#57eb96;fill-opacity:1;stroke-width:21.3331;paint-order:markers fill stroke"
+   id="rect2487"
+   width="251.72937"
+   height="48.473454"
+   x="89.344261"
+   y="272.28604"
+   ry="8.2523623" /><rect
+   style="fill:#57eb96;fill-opacity:1;stroke-width:21.3331;paint-order:markers fill stroke"
+   id="rect2489"
+   width="286.50867"
+   height="33.58923"
+   x="71.101944"
+   y="320.25385"
+   ry="8.2523623" /><rect
+   style="fill:#e7eb57;fill-opacity:1;stroke-width:21.3331;paint-order:markers fill stroke"
+   id="rect2595"
+   width="93.736511"
+   height="115.18949"
+   x="405.83066"
+   y="121.17062"
+   ry="8.2523623" /><g
+   id="g74">
+	<g
+   id="g72">
+		<g
+   id="g70">
+			<path
+   d="M474.194,199.093h-48.167c-4.422,0-8.005,3.583-8.005,8.005s3.583,8.005,8.005,8.005h48.167     c4.422,0,8.005-3.583,8.005-8.005S478.615,199.093,474.194,199.093z"
+   id="path54" />
+			<path
+   d="M450.12,192.344c16.767,0,30.409-13.641,30.409-30.41s-13.641-30.41-30.409-30.41c-16.768,0-30.411,13.641-30.411,30.41     S433.352,192.344,450.12,192.344z M450.12,147.533c7.94,0,14.399,6.46,14.399,14.4c0,7.94-6.459,14.4-14.399,14.4     c-7.941,0-14.401-6.46-14.401-14.4C435.719,153.993,442.179,147.533,450.12,147.533z"
+   id="path56" />
+			<path
+   d="M257.91,283.049c-3.235,0-5.857,2.625-5.857,5.859c0,3.237,2.622,5.859,5.857,5.859c3.238,0,5.861-2.622,5.861-5.859     C263.772,285.674,261.149,283.049,257.91,283.049z"
+   id="path58" />
+			<circle
+   cx="130.812"
+   cy="288.909"
+   r="5.859"
+   id="circle60" />
+			<circle
+   cx="300.279"
+   cy="288.909"
+   r="5.859"
+   id="circle62" />
+			<path
+   d="M499.721,396.846h-88.53V245.63h85.847c4.422,0,8.005-3.583,8.005-8.005V117.836c0-4.421-3.583-8.005-8.005-8.005     h-73.175c0.162-1.001,0.27-2.019,0.27-3.064V94.369c0-10.517-8.557-19.074-19.074-19.074H26.031     c-10.517,0-19.073,8.557-19.073,19.074v12.399c0,8.372,5.428,15.484,12.943,18.044v272.035h-7.623     C5.508,396.846,0,402.354,0,409.126v15.299c0,6.772,5.508,12.28,12.279,12.28h487.441c6.771,0,12.279-5.508,12.279-12.28v-15.299     C512,402.354,506.492,396.846,499.721,396.846z M411.19,125.841h77.842v103.778H411.19V125.841z M22.968,94.369     c0-1.662,1.402-3.064,3.063-3.064h379.027c1.662,0,3.064,1.402,3.064,3.064v12.399c0,1.662-1.402,3.064-3.064,3.064H26.031     c-1.661,0-3.063-1.402-3.063-3.064V94.369z M395.181,125.841v271.005h-7.97V125.841H395.181z M85.365,347.242     c-5.776,0-10.474-4.699-10.474-10.477c0-5.776,4.698-10.474,10.474-10.474h260.359c5.776,0,10.474,4.698,10.474,10.474     c0,5.777-4.698,10.477-10.474,10.477H85.365z M323.229,363.251v33.595h-4.723v-33.595H323.229z M302.496,363.251v33.595H128.594     v-33.595H302.496z M112.584,363.251v33.595h-4.723v-33.595H112.584z M91.853,363.253v33.594H59.889v-52.859     c3.152,11.103,13.375,19.265,25.475,19.265H91.853z M93.37,310.28v-25.238c0-5.529,4.498-10.027,10.025-10.027h224.301     c5.528,0,10.025,4.499,10.025,10.027v25.238H93.37z M339.238,363.251h6.487c12.101,0,22.326-8.162,25.476-19.269v52.863h-31.964     V363.251z M353.73,311.519v-26.478c0-14.356-11.678-26.037-26.035-26.037H103.395c-14.355,0-26.035,11.679-26.035,26.037v26.478     c-8.434,2.681-15.046,9.48-17.471,18.025V245.63h311.312v83.918C368.777,321.001,362.165,314.2,353.73,311.519z M59.889,229.62     V125.842h135.661V229.62H59.889z M211.56,229.62V125.842h7.97V229.62H211.56z M235.538,229.62V125.842h135.662V229.62H235.538z      M43.88,125.841v271.005h-7.97V125.841H43.88z M495.991,420.696H16.01v-7.84h479.981V420.696z"
+   id="path64" />
+			<circle
+   cx="173.177"
+   cy="288.909"
+   r="5.859"
+   id="circle66" />
+			<circle
+   cx="215.545"
+   cy="288.909"
+   r="5.859"
+   id="circle68" />
+		</g>
+	</g>
+</g>
+</svg>
