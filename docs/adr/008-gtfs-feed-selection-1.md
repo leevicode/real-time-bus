@@ -10,8 +10,6 @@
 
 The Waltti open data platform (https://opendata.waltti.fi) provides multiple GTFS feeds for Jyväskylä bus data. Our use case is vehicle tracking on a route. We need to decide which feeds to consume and in what priority order.
 
-The assignment requires at least **two** of: trip updates, vehicle positions, service alerts.
-
 ---
 
 ## Decision
@@ -34,7 +32,7 @@ Core of our use case. Without it, the app cannot show where buses are. Refresh e
 Provides stop-level delay information for UC-02 (track a single vehicle in detail). Without this, we can only show position, not estimated arrival or delay status.
 
 **Service Alerts (Medium)**
-Required by the assignment. Displayed as banners when a route has active disruptions (UC-03). Refreshed less frequently since alerts change slowly.
+Displayed as banners when a route has active disruptions (UC-03). Refreshed less frequently since alerts change slowly.
 
 **GTFS Static (Medium)**
 Provides route names, stop locations, and schedule data. Loaded once on startup since static data changes infrequently.
@@ -59,7 +57,6 @@ Our processing layer handles each case:
 ## Consequences
 
 **Positive:**
-- Fulfills all three assignment feed requirements.
 - Graceful degradation: losing one feed doesn't break the app.
 - Independent refresh rates reduce unnecessary load.
 - GTFS Static enables route search (UC-04) without repeated API calls.
