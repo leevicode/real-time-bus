@@ -117,48 +117,66 @@ function App() {
   if (error) return <div>Error: {error}</div>;
 
   return (
-    <div>
-      <h1>Waltti Routes in Jyväskylä</h1>
-      <MapContainer center={map_position} zoom={13} scrollWheelZoom={false}>
-        <MapClickHandler onClick={() => setSelectedRouteShapes(null)} />
-        <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-        />
-        {selectedRouteShapes && selectedRouteShapes.map((points, idx) => (
-          <Polyline key={idx} positions={points} color="blue" weight={4} opacity={0.7} />
-        ))}
-        {
-          <div style={{ position: "absolute", bottom: 10, left: 10, background: "white", padding: "4px 8px", borderRadius: 4, zIndex: 1000 }}>
-            Loading route...
-          </div>
-        }
+    <>
+    <style>{`
+      html, body, #root {
+        margin: 0;
+        padding: 0;
+        height: 100%;
+        width: 100%;
+      }
+    `}</style>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', width: '100%' }}>
+      <h2 style={{ margin: '0.5rem 1rem', flexShrink: 0 }}>Waltti Routes in Jyväskylä</h2>
+      <div style={{ flexGrow: 1, minHeight: 0, position: 'relative', display: 'flex', justifyContent: 'center' }}>
+        <div style={{ width: '100%', height: '100%' }}>
+          <MapContainer
+            center={map_position}
+            zoom={13}
+            scrollWheelZoom={true}
+            style={{ height: '100%', width: '100%' }}
+          >
+          <MapClickHandler onClick={() => setSelectedRouteShapes(null)} />
+          <TileLayer
+            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          />
+          {selectedRouteShapes && selectedRouteShapes.map((points, idx) => (
+            <Polyline key={idx} positions={points} color="blue" weight={4} opacity={0.7} />
+          ))}
+          {
+            <div style={{ position: "absolute", bottom: 10, left: 10, background: "white", padding: "4px 8px", borderRadius: 4, zIndex: 1000 }}>
+              Loading route...
+            </div>
+          }
 
-        {stops.map((stop) => (
-          <StopPopup
-            key={stop.id}
-            stop={stop}
-            onStopClick={() => fetchStopRoutes(stop.id)}
-            onRouteClick={fetchRouteShape}
-            stopRoutes={stopRoutes}
-          />)
-        )}
+          {stops.map((stop) => (
+            <StopPopup
+              key={stop.id}
+              stop={stop}
+              onStopClick={() => fetchStopRoutes(stop.id)}
+              onRouteClick={fetchRouteShape}
+              stopRoutes={stopRoutes}
+            />)
+          )}
 
-        {buses.map((bus) => {
-          const route = bus.trip?.routeId ? getRoute(bus.trip.routeId) : undefined;
-          return (
-            <Marker
-              key={bus.vehicle.id}
-              position={[bus.position.latitude, bus.position.longitude]}
-              eventHandlers={{ click: () => handleBusClick(bus) }}
-            >
-              <BusPopup route={route} />
-            </Marker>
-          );
-        })}
-      </MapContainer>
-      <p> end</p>
+          {buses.map((bus) => {
+            const route = bus.trip?.routeId ? getRoute(bus.trip.routeId) : undefined;
+            return (
+              <Marker
+                key={bus.vehicle.id}
+                position={[bus.position.latitude, bus.position.longitude]}
+                eventHandlers={{ click: () => handleBusClick(bus) }}
+              >
+                <BusPopup route={route} />
+              </Marker>
+            );
+          })}
+          </MapContainer>
+        </div>
+      </div>
     </div>
+  </>
   );
 }
 
