@@ -15,5 +15,5 @@ We will use TypeScript across the stack.
 ## Consequences
 * **Positive:** Type Safety: Catching type-related errors at compile time reduces bugs in production.
 * **Positive:** Using the same language (TS) across the entire stack simplifies the development process for all team members.
-* **Negative:** TypeScript requires writing more code upfront.
-* **Negative:** Adds a mandatory build step, although this is managed automatically by our Nix pipeline.
+* **Negative:** TypeScript usually requires writing more code upfront.
+* **Negative:** Adds a mandatory build step (compilation via tsc). This can be integrated into the existing development and CI pipelines.
