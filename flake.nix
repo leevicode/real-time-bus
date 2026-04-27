@@ -94,7 +94,7 @@ EOF
         app = pkgs.buildNpmPackage {
           name = "app";
           src = ./app;
-          npmDepsHash = "sha256-NzbrC12tRIrPgW7uis6eGpHUV4Yd16aGUA1bIZWmAUk=";
+          npmDepsHash = "sha256-UkfIKb9d1ySTYQ9MrVUvzVm0qnL6JGvuDnFyd7GRCY0=";
 
           buildPhase = ''
             runHook preBuild
