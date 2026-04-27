@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { MapContainer, TileLayer, Marker, Polyline, Circle } from "react-leaflet";
+import { MapContainer, TileLayer, Marker, Polyline, Circle, useMap } from "react-leaflet";
 import L from "leaflet";
 
 import { getSocket } from "./service/busSocket";
@@ -28,6 +28,20 @@ function MapClickHandler({ onClick }: { onClick: () => void }) {
   useMapEvents({
     click: () => onClick(),
   });
+  return null;
+}
+
+function CenterOnUser({ userLocation }: { userLocation: Point | null }) {
+  const map = useMap();
+  const centered = useRef(false); // only center once
+
+  useEffect(() => {
+    if (userLocation && !centered.current) {
+      map.flyTo(userLocation, 15, { duration: 1.5 });
+      centered.current = true;
+    }
+  }, [userLocation, map]);
+
   return null;
 }
 
@@ -114,8 +128,6 @@ function App() {
       return;
     }
 
-    let intervalId: ReturnType<typeof setInterval>;
-
     const updateLocation = () => {
         navigator.geolocation.getCurrentPosition(
           (pos) => {
@@ -137,7 +149,7 @@ function App() {
       };
 
       updateLocation();
-      intervalId = setInterval(updateLocation, 1000);
+      const intervalId = setInterval(updateLocation, 1000);
       return () => clearInterval(intervalId);
 
   }, []);
@@ -175,6 +187,7 @@ function App() {
     <div>
       <h1>Waltti Routes in Jyväskylä</h1>
       <MapContainer center={map_position} zoom={13} scrollWheelZoom={false}>
+        <CenterOnUser userLocation={userLocation} />
         <MapClickHandler onClick={() => setSelectedRouteShapes(null)} />
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
