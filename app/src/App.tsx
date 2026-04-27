@@ -239,21 +239,20 @@ function App() {
           />)
         )}
 
-        {buses.map((bus) => {
-          const route = bus.trip?.routeId ? getRoute(bus.trip.routeId) : undefined;
-          return (
-            <Marker
-              key={bus.vehicle.id}
-              position={[bus.position.latitude, bus.position.longitude]}
-              eventHandlers={{ click: () => handleBusClick(bus) }}
-            >
-              <BusPopup route={route} />
-            </Marker>
-          );
-        })}
-      </MapContainer>
-      <p> end</p>
-    </div>
+          {buses.map((bus) => {
+            const route = bus.trip?.routeId ? getRoute(bus.trip.routeId) : undefined;
+            return (
+              <Marker
+                key={bus.vehicle.id}
+                position={[bus.position.latitude, bus.position.longitude]}
+                eventHandlers={{ click: () => handleBusClick(bus) }}
+              >
+                <BusPopup route={route} />
+              </Marker>
+            );
+          })}
+          </MapContainer>
+      </div>
   );
 }
 
