@@ -2,7 +2,7 @@
 
 **Date:** 2026-04-22
 **Status:** Partially Accepted
-**Deciders:** Development Team
+**Deciders:** Viirret, Timonen, Leino, Daneshvar
 
 ---
 
