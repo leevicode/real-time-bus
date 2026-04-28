@@ -187,7 +187,7 @@ function App() {
     return (
     <>
       <div className="app-container">
-        <h2 className="app-title">Waltti Routes in Jyväskylä</h2>
+        <h1 className="app-title">Waltti Routes in Jyväskylä</h1>
         <div className="map-wrapper">
           <div className="map-inner">
             <MapContainer
