@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { MapContainer, TileLayer, Marker, Polyline, Circle, useMap } from "react-leaflet";
-import L from "leaflet";
+import { icon } from "leaflet";
 
 import { getSocket } from "./service/busSocket";
 import { getApiBaseUrl } from "./service/routeService";
