@@ -15,7 +15,7 @@ import type { Point } from "./types/point";
 import { useMapEvents } from 'react-leaflet';
 import { StopPopup } from "./component/stopPopup.";
 
-const userLocationIcon = new L.Icon({
+const userLocationIcon = icon({
   iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-orange.png',
   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
   iconSize: [25, 41],
