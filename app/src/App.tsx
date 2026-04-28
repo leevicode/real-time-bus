@@ -1,5 +1,5 @@
-import { useState, useEffect, } from "react";
-import { MapContainer, TileLayer, Polyline, Marker } from "react-leaflet";
+import { useState, useEffect, useRef } from "react";
+import { MapContainer, TileLayer, Marker, Polyline, Circle, useMap } from "react-leaflet";
 import { icon } from "leaflet";
 import { getSocket } from "./service/busSocket";
 import { getApiBaseUrl } from "./service/routeService";
@@ -14,6 +14,15 @@ import type { Point } from "./types/point";
 import { useMapEvents } from 'react-leaflet';
 import { StopPopup } from "./component/stopPopup.";
 
+const userLocationIcon = icon({
+  iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-orange.png',
+  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
+  shadowSize: [41, 41]
+});
+
 function MapClickHandler({ onClick }: { onClick: () => void }) {
   useMapEvents({
     click: () => onClick(),
@@ -25,6 +34,20 @@ interface SelectedRoute {
   shape: Shape[]
 };
 
+function CenterOnUser({ userLocation }: { userLocation: Point | null }) {
+  const map = useMap();
+  const centered = useRef(false); // only center once
+
+  useEffect(() => {
+    if (userLocation && !centered.current) {
+      map.flyTo(userLocation, 15, { duration: 1.5 });
+      centered.current = true;
+    }
+  }, [userLocation, map]);
+
+  return null;
+}
+
 function App() {
   const [routes, setRoutes] = useState<Route[]>([]);
   const [loading, setLoading] = useState(true);
@@ -33,6 +56,12 @@ function App() {
   const [selectedRoute, setSelectedRoute] = useState<SelectedRoute | null>(null);
   const [stops, setStops] = useState<Stop[]>([]);
   const [stopRoutes, setStopRoutes] = useState<Record<string, StopRouteInfo[]>>({});
+
+  // User location.
+  const [userLocation, setUserLocation] = useState<Point | null>(null);
+  const [userLocationAccuracy, setUserLocationAccuracy] = useState<number | null>(null);
+
+  const locationErrorLogged = useRef(false);
 
   const fetchStopRoutes = async (stopId: string) => {
     // Already fetched.
@@ -47,6 +76,7 @@ function App() {
     }
   };
 
+  // Fetch routes.
   useEffect(() => {
     fetch(getApiBaseUrl() + "/api/routes/jyväskylä")
       .then((res) => {
@@ -63,6 +93,7 @@ function App() {
       });
   }, []);
 
+  // Fetch stops.
   useEffect(() => {
     fetch(getApiBaseUrl() + "/api/stops/jyväskylä")
       .then((res) => {
@@ -77,6 +108,7 @@ function App() {
       });
   }, []);
 
+  // Websocket for busses.
   useEffect(() => {
     if (selectedRoute == undefined) return;
     fetch(getApiBaseUrl() + `/api/shapes/jyväskylä/${selectedRoute.route_id}`)
@@ -107,6 +139,39 @@ function App() {
       });
   }, []);
 
+  // User location tracking.
+  useEffect(() => {
+    if (!navigator.geolocation) {
+      console.log("Geolocation is not supported by your browser");
+      return;
+    }
+
+    const updateLocation = () => {
+        navigator.geolocation.getCurrentPosition(
+          (pos) => {
+            setUserLocation([pos.coords.latitude, pos.coords.longitude]);
+            setUserLocationAccuracy(pos.coords.accuracy);
+          },
+          (err) => {
+            if (!locationErrorLogged.current) {
+              console.log("Location not available (likely on desktop), err:", err.message);
+              locationErrorLogged.current = true;
+            }
+          },
+          {
+            enableHighAccuracy: true,
+            timeout: 10000,
+            maximumAge: 0
+          }
+        );
+      };
+
+      updateLocation();
+      const intervalId = setInterval(updateLocation, 1000);
+      return () => clearInterval(intervalId);
+
+  }, []);
+
   const getRoute = (routeId: string) => routes.find((r) => r.route_id == routeId);
 
   const map_position: Point = [62.24147, 25.72088];
@@ -130,6 +195,7 @@ function App() {
     <div>
       <h1>Waltti Routes in Jyväskylä</h1>
       <MapContainer center={map_position} zoom={13} scrollWheelZoom={false}>
+        <CenterOnUser userLocation={userLocation} />
         <MapClickHandler onClick={() => setSelectedRoute(null)} />
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
@@ -144,6 +210,33 @@ function App() {
             Loading route...
           </div>
         }
+
+        {userLocation && (
+          <>
+            {userLocationAccuracy && (
+              <Circle
+                center={userLocation}
+                radius={userLocationAccuracy}
+                pathOptions={{
+                  color: '#4285f4',
+                  fillColor: '#4285f4',
+                  fillOpacity: 0.1,
+                  weight: 1,
+                  opacity: 0.5
+                }}
+              />
+            )}
+            <Marker
+              position={userLocation}
+              icon={userLocationIcon}
+            >
+              <div>
+                You are here
+                {userLocationAccuracy && ` (accuracy: ±${Math.round(userLocationAccuracy)}m)`}
+              </div>
+            </Marker>
+          </>
+        )}
 
         {stops.map((stop) => (
           <StopPopup
