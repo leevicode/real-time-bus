@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { MapContainer, TileLayer, Marker, Polyline, Circle, useMap } from "react-leaflet";
 import { icon } from "leaflet";
+import "./App.css";
 import { getSocket } from "./service/busSocket";
 import { getApiBaseUrl } from "./service/routeService";
 import type { Shape } from "./types/shape";
@@ -188,83 +189,81 @@ function App() {
   const shapes: Shape[] = (selectedRoute && selectedRoute.shape) ?? [];
   if (loading) return <div>Loading routes...</div>;
   if (error) return <div>Error: {error}</div>;
-
   const busIcon = icon({ iconUrl: "bus.svg", iconSize: [40, 40] });
   const selectedBusIcon = icon({ iconUrl: "bus_selected.svg", iconSize: [60, 60] })
-  return (
-    <div>
-      <h1>Waltti Routes in Jyväskylä</h1>
-      <MapContainer center={map_position} zoom={13} scrollWheelZoom={false}>
-        <CenterOnUser userLocation={userLocation} />
-        <MapClickHandler onClick={() => setSelectedRoute(null)} />
-        <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-        />
-        {shapes.length > 0 && shapes
-          .map((points, idx) => (
-            <Polyline key={idx} positions={points} color="blue" weight={4} opacity={0.7} />
-          ))}
-        {
-          <div style={{ position: "absolute", bottom: 10, left: 10, background: "white", padding: "4px 8px", borderRadius: 4, zIndex: 1000 }}>
-            Loading route...
-          </div>
-        }
-
-        {userLocation && (
-          <>
-            {userLocationAccuracy && (
-              <Circle
-                center={userLocation}
-                radius={userLocationAccuracy}
-                pathOptions={{
-                  color: '#4285f4',
-                  fillColor: '#4285f4',
-                  fillOpacity: 0.1,
-                  weight: 1,
-                  opacity: 0.5
-                }}
-              />
-            )}
-            <Marker
-              position={userLocation}
-              icon={userLocationIcon}
+    return (
+    <>
+      <div className="app-container">
+        <h1 className="app-title">Waltti Routes in Jyväskylä</h1>
+        <div className="map-wrapper">
+          <div className="map-inner">
+            <MapContainer
+              center={map_position}
+              zoom={13}
+              scrollWheelZoom={true}
+              style={{ height: '100%', width: '100%' }}
             >
-              <div>
-                You are here
-                {userLocationAccuracy && ` (accuracy: ±${Math.round(userLocationAccuracy)}m)`}
-              </div>
-            </Marker>
-          </>
-        )}
-
-        {stops.map((stop) => (
-          <StopPopup
-            key={stop.id}
-            stop={stop}
-            onStopClick={() => fetchStopRoutes(stop.id)}
-            onRouteClick={(route_id) => setSelectedRoute({ route_id, shape: [] })}
-            stopRoutes={stopRoutes}
-          />)
-        )}
-
-        {buses.map((bus) => {
-          const route = bus.trip?.routeId ? getRoute(bus.trip.routeId) : undefined;
-          const isSelected = bus.trip?.routeId === selectedRoute?.route_id;
-          const icon = isSelected ? selectedBusIcon : busIcon;
-          return (
-            <Marker
-              key={bus.vehicle.id}
-              position={[bus.position.latitude, bus.position.longitude]}
-              eventHandlers={{ click: () => handleBusClick(bus) }}
-              icon={icon}>
-              <BusPopup route={route} />
-            </Marker>
-          );
-        })}
-      </MapContainer>
-      <p> end</p>
-    </div>
+              <CenterOnUser userLocation={userLocation} />
+              <MapClickHandler onClick={() => setSelectedRoute(null)} />
+              <TileLayer
+                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+              />
+              {shapes.length > 0 && shapes
+                .map((points, idx) => (
+                  <Polyline key={idx} positions={points} color="blue" weight={4} opacity={0.7} />
+                ))}
+              {userLocation && (
+                <>
+                  {userLocationAccuracy && (
+                    <Circle
+                      center={userLocation}
+                      radius={userLocationAccuracy}
+                      pathOptions={{
+                        color: '#4285f4',
+                        fillColor: '#4285f4',
+                        fillOpacity: 0.1,
+                        weight: 1,
+                        opacity: 0.5
+                      }}
+                    />
+                  )}
+                  <Marker position={userLocation} icon={userLocationIcon}>
+                    <div>
+                      You are here
+                      {userLocationAccuracy && ` (accuracy: ±${Math.round(userLocationAccuracy)}m)`}
+                    </div>
+                  </Marker>
+                </>
+              )}
+             {stops.map((stop) => (
+              <StopPopup
+                key={stop.id}
+                stop={stop}
+                onStopClick={() => fetchStopRoutes(stop.id)}
+                onRouteClick={(route_id) => setSelectedRoute({ route_id, shape: [] })}
+                stopRoutes={stopRoutes}
+              />)
+              )}
+              {buses.map((bus) => {
+                const route = bus.trip?.routeId ? getRoute(bus.trip.routeId) : undefined;
+                const isSelected = bus.trip?.routeId === selectedRoute?.route_id;
+                const icon = isSelected ? selectedBusIcon : busIcon;
+                return (
+                  <Marker
+                    key={bus.vehicle.id}
+                    position={[bus.position.latitude, bus.position.longitude]}
+                    eventHandlers={{ click: () => handleBusClick(bus) }}
+                    icon={icon}>
+                    <BusPopup route={route} />
+                  </Marker>
+                );
+              })}
+            </MapContainer>
+          </div>
+        </div>
+      </div>
+    </>
   );
 }
 
