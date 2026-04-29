@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { MapContainer, TileLayer, Marker, Polyline, Circle, useMap } from "react-leaflet";
 import { icon } from "leaflet";
-
 import "./App.css";
 import { getSocket } from "./service/busSocket";
 import { getApiBaseUrl } from "./service/routeService";
@@ -31,6 +30,10 @@ function MapClickHandler({ onClick }: { onClick: () => void }) {
   });
   return null;
 }
+interface SelectedRoute {
+  route_id: string,
+  shape: Shape[]
+};
 
 function CenterOnUser({ userLocation }: { userLocation: Point | null }) {
   const map = useMap();
@@ -51,7 +54,7 @@ function App() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [buses, setBuses] = useState<Bus[]>([]);
-  const [selectedRouteShapes, setSelectedRouteShapes] = useState<Shape[] | null>(null);
+  const [selectedRoute, setSelectedRoute] = useState<SelectedRoute | null>(null);
   const [stops, setStops] = useState<Stop[]>([]);
   const [stopRoutes, setStopRoutes] = useState<Record<string, StopRouteInfo[]>>({});
 
@@ -108,6 +111,21 @@ function App() {
 
   // Websocket for busses.
   useEffect(() => {
+    if (selectedRoute == undefined) return;
+    fetch(getApiBaseUrl() + `/api/shapes/jyväskylä/${selectedRoute.route_id}`)
+      .then((res) => {
+        if (!res.ok) throw new Error("Failed to load shape");
+        return res.json();
+      })
+      .then((data) => {
+        setSelectedRoute({ route_id: selectedRoute.route_id, shape: data.shapes });
+      })
+      .catch((err) => {
+        console.error("Shape fetch error:", err);
+      });
+  }, [selectedRoute?.route_id]
+  );
+  useEffect(() => {
     getSocket()
       .then((socket) => {
         console.log("resolved");
@@ -159,31 +177,20 @@ function App() {
 
   const map_position: Point = [62.24147, 25.72088];
 
-  // Fetch shape points when a bus is clicked
-  const fetchRouteShape = async (routeId: string) => {
-    try {
-      const res = await fetch(getApiBaseUrl() + `/api/shapes/jyväskylä/${routeId}`);
-      if (!res.ok) throw new Error("Failed to load shape");
-      const data = await res.json();
-      setSelectedRouteShapes(data.shapes?.length ? data.shapes : null);
-    } catch (err) {
-      console.error("Shape fetch error:", err);
-      setSelectedRouteShapes(null);
-    }
-  };
 
   const handleBusClick = (bus: Bus) => {
     const route = bus.trip?.routeId ? getRoute(bus.trip.routeId) : undefined;
-    if (route) {
-      fetchRouteShape(route.route_id);
+    if (route != undefined) {
+      setSelectedRoute({ route_id: route.route_id, shape: [] });
     } else {
       console.warn("No route metadata found for bus", bus);
     }
   };
-
+  const shapes: Shape[] = (selectedRoute && selectedRoute.shape) ?? [];
   if (loading) return <div>Loading routes...</div>;
   if (error) return <div>Error: {error}</div>;
-
+  const busIcon = icon({ iconUrl: "bus.svg", iconSize: [40, 40] });
+  const selectedBusIcon = icon({ iconUrl: "bus_selected.svg", iconSize: [60, 60] })
     return (
     <>
       <div className="app-container">
@@ -197,15 +204,15 @@ function App() {
               style={{ height: '100%', width: '100%' }}
             >
               <CenterOnUser userLocation={userLocation} />
-              <MapClickHandler onClick={() => setSelectedRouteShapes(null)} />
+              <MapClickHandler onClick={() => setSelectedRoute(null)} />
               <TileLayer
                 attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                 url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
               />
-              {selectedRouteShapes && selectedRouteShapes.map((points, idx) => (
-                <Polyline key={idx} positions={points} color="blue" weight={4} opacity={0.7} />
-              ))}
-
+              {shapes.length > 0 && shapes
+                .map((points, idx) => (
+                  <Polyline key={idx} positions={points} color="blue" weight={4} opacity={0.7} />
+                ))}
               {userLocation && (
                 <>
                   {userLocationAccuracy && (
@@ -229,25 +236,25 @@ function App() {
                   </Marker>
                 </>
               )}
-
-              {stops.map((stop) => (
-                <StopPopup
-                  key={stop.id}
-                  stop={stop}
-                  onStopClick={() => fetchStopRoutes(stop.id)}
-                  onRouteClick={fetchRouteShape}
-                  stopRoutes={stopRoutes}
-                />
-              ))}
-
+             {stops.map((stop) => (
+              <StopPopup
+                key={stop.id}
+                stop={stop}
+                onStopClick={() => fetchStopRoutes(stop.id)}
+                onRouteClick={(route_id) => setSelectedRoute({ route_id, shape: [] })}
+                stopRoutes={stopRoutes}
+              />)
+              )}
               {buses.map((bus) => {
                 const route = bus.trip?.routeId ? getRoute(bus.trip.routeId) : undefined;
+                const isSelected = bus.trip?.routeId === selectedRoute?.route_id;
+                const icon = isSelected ? selectedBusIcon : busIcon;
                 return (
                   <Marker
                     key={bus.vehicle.id}
                     position={[bus.position.latitude, bus.position.longitude]}
                     eventHandlers={{ click: () => handleBusClick(bus) }}
-                  >
+                    icon={icon}>
                     <BusPopup route={route} />
                   </Marker>
                 );

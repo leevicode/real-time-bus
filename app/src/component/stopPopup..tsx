@@ -1,25 +1,21 @@
-import { CircleMarker, Popup } from "react-leaflet";
+import { Popup, Marker } from "react-leaflet";
 import type { StopRouteInfo } from "../interfaces/stop_route_info";
 import type { Stop } from "../interfaces/stop";
+import { icon } from "leaflet";
 
 interface StopPopupProps {
   stop: Stop;
   onStopClick: () => unknown;
-  onRouteClick: (route_id: string) => unknown;
+  onRouteClick: (route_id : string) => unknown;
   stopRoutes: Record<string, StopRouteInfo[]>;
 }
-
+const stopIcon = icon({iconSize: [20,20], iconUrl: "station.svg"});
 export function StopPopup({ stop, onStopClick, onRouteClick, stopRoutes }: StopPopupProps) {
   return (
-    <CircleMarker
+    <Marker
       key={stop.id}
-      center={[stop.lat, stop.lon]}
-      radius={6}
-      fillColor="green"
-      color="darkgreen"
-      weight={2}
-      opacity={0.8}
-      fillOpacity={0.7}
+      position={[stop.lat, stop.lon]}
+      icon={stopIcon}
       eventHandlers={{ click: onStopClick }}>
       <Popup>
         <div>
@@ -55,6 +51,6 @@ export function StopPopup({ stop, onStopClick, onRouteClick, stopRoutes }: StopP
           {!stopRoutes[stop.id] && <div>Click to load routes…</div>}
         </div>
       </Popup>
-    </CircleMarker>
+    </Marker>
   )
 }
