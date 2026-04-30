@@ -1,6 +1,7 @@
 # 003 Use React for Frontend Development
 
 Date: 30.3.2026
+Authors: Development Team
 
 ## Status
 

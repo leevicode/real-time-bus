@@ -1,6 +1,7 @@
 # 001 Use Architecture Decision Records
 
 Date: 30.3.2026
+Authors: Development Team
 
 ## Status
 
