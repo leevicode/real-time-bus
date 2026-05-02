@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { MapContainer, TileLayer, Marker, Polyline, Circle, useMap } from "react-leaflet";
-import { icon } from "leaflet";
+import { MapContainer, TileLayer, useMap } from "react-leaflet";
 import "./App.css";
 import { getSocket } from "./service/busSocket";
 import { getApiBaseUrl } from "./service/routeService";
@@ -9,20 +8,15 @@ import type { Route } from "./interfaces/route";
 import type { Bus } from "./interfaces/bus";
 import type { Stop } from "./interfaces/stop";
 import type { StopRouteInfo } from "./interfaces/stop_route_info";
-import { BusPopup } from "./component/busPopup";
 import type { Point } from "./types/point";
-
 import { useMapEvents } from 'react-leaflet';
-import { StopPopup } from "./component/stopPopup.";
+import { Shapes } from "./component/shapes";
+import { UserLocation } from "./component/userLocation";
+import { Stops } from "./component/stops";
+import type { SelectedRoute } from "./interfaces/selectedRoute";
+import { Buses } from "./component/buses";
 
-const userLocationIcon = icon({
-  iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-orange.png',
-  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
-  iconSize: [25, 41],
-  iconAnchor: [12, 41],
-  popupAnchor: [1, -34],
-  shadowSize: [41, 41]
-});
+
 
 function MapClickHandler({ onClick }: { onClick: () => void }) {
   useMapEvents({
@@ -30,10 +24,6 @@ function MapClickHandler({ onClick }: { onClick: () => void }) {
   });
   return null;
 }
-interface SelectedRoute {
-  route_id: string,
-  shape: Shape[]
-};
 
 function CenterOnUser({ userLocation }: { userLocation: Point | null }) {
   const map = useMap();
@@ -148,28 +138,28 @@ function App() {
     }
 
     const updateLocation = () => {
-        navigator.geolocation.getCurrentPosition(
-          (pos) => {
-            setUserLocation([pos.coords.latitude, pos.coords.longitude]);
-            setUserLocationAccuracy(pos.coords.accuracy);
-          },
-          (err) => {
-            if (!locationErrorLogged.current) {
-              console.log("Location not available (likely on desktop), err:", err.message);
-              locationErrorLogged.current = true;
-            }
-          },
-          {
-            enableHighAccuracy: true,
-            timeout: 10000,
-            maximumAge: 0
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          setUserLocation([pos.coords.latitude, pos.coords.longitude]);
+          setUserLocationAccuracy(pos.coords.accuracy);
+        },
+        (err) => {
+          if (!locationErrorLogged.current) {
+            console.log("Location not available (likely on desktop), err:", err.message);
+            locationErrorLogged.current = true;
           }
-        );
-      };
+        },
+        {
+          enableHighAccuracy: true,
+          timeout: 10000,
+          maximumAge: 0
+        }
+      );
+    };
 
-      updateLocation();
-      const intervalId = setInterval(updateLocation, 1000);
-      return () => clearInterval(intervalId);
+    updateLocation();
+    const intervalId = setInterval(updateLocation, 1000);
+    return () => clearInterval(intervalId);
 
   }, []);
 
@@ -189,9 +179,8 @@ function App() {
   const shapes: Shape[] = (selectedRoute && selectedRoute.shape) ?? [];
   if (loading) return <div>Loading routes...</div>;
   if (error) return <div>Error: {error}</div>;
-  const busIcon = icon({ iconUrl: "bus.svg", iconSize: [40, 40] });
-  const selectedBusIcon = icon({ iconUrl: "bus_selected.svg", iconSize: [60, 60] })
-    return (
+
+  return (
     <>
       <div className="app-container">
         <h1 className="app-title">Waltti Routes in Jyväskylä</h1>
@@ -209,56 +198,20 @@ function App() {
                 attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                 url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
               />
-              {shapes.length > 0 && shapes
-                .map((points, idx) => (
-                  <Polyline key={idx} positions={points} color="blue" weight={4} opacity={0.7} />
-                ))}
-              {userLocation && (
-                <>
-                  {userLocationAccuracy && (
-                    <Circle
-                      center={userLocation}
-                      radius={userLocationAccuracy}
-                      pathOptions={{
-                        color: '#4285f4',
-                        fillColor: '#4285f4',
-                        fillOpacity: 0.1,
-                        weight: 1,
-                        opacity: 0.5
-                      }}
-                    />
-                  )}
-                  <Marker position={userLocation} icon={userLocationIcon}>
-                    <div>
-                      You are here
-                      {userLocationAccuracy && ` (accuracy: ±${Math.round(userLocationAccuracy)}m)`}
-                    </div>
-                  </Marker>
-                </>
-              )}
-             {stops.map((stop) => (
-              <StopPopup
-                key={stop.id}
-                stop={stop}
-                onStopClick={() => fetchStopRoutes(stop.id)}
-                onRouteClick={(route_id) => setSelectedRoute({ route_id, shape: [] })}
-                stopRoutes={stopRoutes}
-              />)
-              )}
-              {buses.map((bus) => {
-                const route = bus.trip?.routeId ? getRoute(bus.trip.routeId) : undefined;
-                const isSelected = bus.trip?.routeId === selectedRoute?.route_id;
-                const icon = isSelected ? selectedBusIcon : busIcon;
-                return (
-                  <Marker
-                    key={bus.vehicle.id}
-                    position={[bus.position.latitude, bus.position.longitude]}
-                    eventHandlers={{ click: () => handleBusClick(bus) }}
-                    icon={icon}>
-                    <BusPopup route={route} />
-                  </Marker>
-                );
-              })}
+              {<Shapes shapes={shapes} />}
+              {<UserLocation userLocation={userLocation} userLocationAccuracy={userLocationAccuracy} />}
+              {<Stops
+                stops={stops}
+                onStopClick={fetchStopRoutes}
+                onRouteClick={(route_id: string) => setSelectedRoute({ route_id, shape: [] })}
+                stopRoutes={stopRoutes} />
+              }
+              {<Buses
+                buses={buses}
+                getRoute={getRoute}
+                selectedRoute={selectedRoute}
+                onBusClick={handleBusClick} />
+              }
             </MapContainer>
           </div>
         </div>
