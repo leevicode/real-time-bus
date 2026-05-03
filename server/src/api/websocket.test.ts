@@ -73,10 +73,17 @@ describe('WebSocket Layer', () => {
     mockClients.add({ readyState: 1, send: mockSend });
     (fetchBusPositions as any).mockRejectedValue(new Error('Network error'));
 
+    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
     const cleanup = setupWebSocket(app, apiKey);
     
     await expect(vi.advanceTimersByTimeAsync(2000)).resolves.toBeDefined();
-    
+
+    expect(consoleErrorSpy).toHaveBeenCalledWith(
+      'Error broadcasting buses:',
+      expect.any(Error)
+    );
+
+    consoleErrorSpy.mockRestore();
     cleanup();
   });
 });

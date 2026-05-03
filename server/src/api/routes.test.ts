@@ -67,6 +67,8 @@ describe('Routes API Layer', () => {
 
     (fetchData as any).mockRejectedValue(new Error('Fetch failed'));
 
+    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+
     const req = httpMocks.createRequest({ method: 'GET', url: '/jyväskylä' });
     const res = httpMocks.createResponse({ eventEmitter: EventEmitter });
 
@@ -76,6 +78,12 @@ describe('Routes API Layer', () => {
 
     expect(res.statusCode).toBe(500);
     expect(res._getJSONData().error).toBe('Failed to load routes data.');
+
+    expect(consoleErrorSpy).toHaveBeenCalledWith(
+      'Failed to load routes for jyväskylä:',
+      expect.any(Error)
+    );
+    consoleErrorSpy.mockRestore();
   });
 
   it('should return 500 if route processing fails due to corrupt data', async () => {
@@ -86,6 +94,8 @@ describe('Routes API Layer', () => {
     const mockParse = vi.fn().mockResolvedValue(corruptData);
     (fetchData as any).mockResolvedValue({ parse: mockParse });
 
+    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+
     const req = httpMocks.createRequest({ method: 'GET', url: '/jyväskylä' });
     const res = httpMocks.createResponse({ eventEmitter: EventEmitter });
 
@@ -95,5 +105,11 @@ describe('Routes API Layer', () => {
 
     expect(res.statusCode).toBe(500);
     expect(res._getJSONData().error).toBe('Failed to load routes data.');
+
+    expect(consoleErrorSpy).toHaveBeenCalledWith(
+      'Failed to load routes for jyväskylä:',
+      expect.any(Error)
+    );
+    consoleErrorSpy.mockRestore();
   });
 });

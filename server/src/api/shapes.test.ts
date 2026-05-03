@@ -68,6 +68,8 @@ describe('Shapes API Layer', () => {
     
     (shapeProcessor as any).mockRejectedValue(new Error("No shape points found for this route."));
 
+    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+
     const req = httpMocks.createRequest({ method: 'GET', url: '/jyväskylä/999' });
     const res = httpMocks.createResponse({ eventEmitter: EventEmitter });
 
@@ -77,5 +79,6 @@ describe('Shapes API Layer', () => {
 
     expect(res.statusCode).toBe(404);
     expect(res._getJSONData().error).toBe("No shape points found for this route.");
+    consoleErrorSpy.mockRestore();
   });
 });
