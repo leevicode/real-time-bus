@@ -79,6 +79,10 @@ describe('Shapes API Layer', () => {
 
     expect(res.statusCode).toBe(404);
     expect(res._getJSONData().error).toBe("No shape points found for this route.");
+    expect(consoleErrorSpy).toHaveBeenCalledWith(
+      'Failed to load shapes for route 999 in jyväskylä:',
+      expect.any(Error)
+    );
     consoleErrorSpy.mockRestore();
   });
 });
