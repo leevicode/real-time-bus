@@ -12,8 +12,8 @@ export interface BusesProps {
     selectedRoute : SelectedRoute | null;
     getRoute: (route_id: string) => Route | undefined;
     onBusClick: (bus: Bus) => unknown;
-
 }
+
 export function Buses({ buses, getRoute, onBusClick, selectedRoute }: BusesProps) {
     return (
         buses.map((bus) => {

@@ -11,26 +11,28 @@ const userLocationIcon = icon({
     shadowSize: [41, 41]
 });
 
+const pathOptions = {
+    color: '#4285f4',
+    fillColor: '#4285f4',
+    fillOpacity: 0.1,
+    weight: 1,
+    opacity: 0.5
+};
+
 export interface UserLocationProps {
     userLocation: Point | null;
     userLocationAccuracy: number | null;
 }
 
 export function UserLocation({ userLocation, userLocationAccuracy }: UserLocationProps) {
-    if (userLocation == null) return (<></>);
+    if (!userLocation) return null;
     return (
         <>
             {userLocationAccuracy && (
                 <Circle
                     center={userLocation}
                     radius={userLocationAccuracy}
-                    pathOptions={{
-                        color: '#4285f4',
-                        fillColor: '#4285f4',
-                        fillOpacity: 0.1,
-                        weight: 1,
-                        opacity: 0.5
-                    }}
+                    pathOptions={pathOptions}
                 />
             )}
             <Marker position={userLocation} icon={userLocationIcon}>

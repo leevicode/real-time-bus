@@ -1,5 +1,4 @@
 import { useState, useEffect, useRef } from "react";
-import { MapContainer, TileLayer, useMap } from "react-leaflet";
 import "./App.css";
 import { getSocket } from "./service/busSocket";
 import { getApiBaseUrl } from "./service/routeService";
@@ -9,35 +8,12 @@ import type { Bus } from "./interfaces/bus";
 import type { Stop } from "./interfaces/stop";
 import type { StopRouteInfo } from "./interfaces/stop_route_info";
 import type { Point } from "./types/point";
-import { useMapEvents } from 'react-leaflet';
 import { Shapes } from "./component/shapes";
 import { UserLocation } from "./component/userLocation";
 import { Stops } from "./component/stops";
 import type { SelectedRoute } from "./interfaces/selectedRoute";
 import { Buses } from "./component/buses";
-
-
-
-function MapClickHandler({ onClick }: { onClick: () => void }) {
-  useMapEvents({
-    click: () => onClick(),
-  });
-  return null;
-}
-
-function CenterOnUser({ userLocation }: { userLocation: Point | null }) {
-  const map = useMap();
-  const centered = useRef(false); // only center once
-
-  useEffect(() => {
-    if (userLocation && !centered.current) {
-      map.flyTo(userLocation, 15, { duration: 1.5 });
-      centered.current = true;
-    }
-  }, [userLocation, map]);
-
-  return null;
-}
+import { MainLayout } from "./component/mainLayout";
 
 function App() {
   const [routes, setRoutes] = useState<Route[]>([]);
@@ -99,7 +75,6 @@ function App() {
       });
   }, []);
 
-  // Websocket for busses.
   useEffect(() => {
     if (selectedRoute == undefined) return;
     fetch(getApiBaseUrl() + `/api/shapes/jyväskylä/${selectedRoute.route_id}`)
@@ -115,6 +90,7 @@ function App() {
       });
   }, [selectedRoute?.route_id]
   );
+  // Websocket for busses.
   useEffect(() => {
     getSocket()
       .then((socket) => {
@@ -181,42 +157,26 @@ function App() {
   if (error) return <div>Error: {error}</div>;
 
   return (
-    <>
-      <div className="app-container">
-        <h1 className="app-title">Waltti Routes in Jyväskylä</h1>
-        <div className="map-wrapper">
-          <div className="map-inner">
-            <MapContainer
-              center={map_position}
-              zoom={13}
-              scrollWheelZoom={true}
-              style={{ height: '100%', width: '100%' }}
-            >
-              <CenterOnUser userLocation={userLocation} />
-              <MapClickHandler onClick={() => setSelectedRoute(null)} />
-              <TileLayer
-                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-              />
-              {<Shapes shapes={shapes} />}
-              {<UserLocation userLocation={userLocation} userLocationAccuracy={userLocationAccuracy} />}
-              {<Stops
-                stops={stops}
-                onStopClick={fetchStopRoutes}
-                onRouteClick={(route_id: string) => setSelectedRoute({ route_id, shape: [] })}
-                stopRoutes={stopRoutes} />
-              }
-              {<Buses
-                buses={buses}
-                getRoute={getRoute}
-                selectedRoute={selectedRoute}
-                onBusClick={handleBusClick} />
-              }
-            </MapContainer>
-          </div>
-        </div>
-      </div>
-    </>
+    <MainLayout
+      userLocation={userLocation}
+      map_position={map_position}
+      onMapClick={() => setSelectedRoute(null)}
+    >
+      {<Shapes shapes={shapes} />}
+      {<UserLocation userLocation={userLocation} userLocationAccuracy={userLocationAccuracy} />}
+      {<Stops
+        stops={stops}
+        onStopClick={fetchStopRoutes}
+        onRouteClick={(route_id: string) => setSelectedRoute({ route_id, shape: [] })}
+        stopRoutes={stopRoutes} />
+      }
+      {<Buses
+        buses={buses}
+        getRoute={getRoute}
+        selectedRoute={selectedRoute}
+        onBusClick={handleBusClick} />
+      }
+    </MainLayout>
   );
 }
 
