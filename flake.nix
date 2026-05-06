@@ -68,7 +68,7 @@
           name = "server";
           src = ./server;
 
-          npmDepsHash = "sha256-cLhRG1c3U6Sy0xDzjbX4LoKpCOb9NBzRnwiAGgdgv4o=";
+          npmDepsHash = "sha256-BkFOYwLpPyer5cU2EyYy8wJtlYEFBlZiV3jcqjk2HO8=";
 
           buildPhase = ''
            runHook preBuild
