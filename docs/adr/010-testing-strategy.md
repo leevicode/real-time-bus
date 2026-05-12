@@ -2,7 +2,7 @@
 
 **Date:** 2026-05-05
 **Status:** Accepted
-**Authors:** Leevi, Valtteri, viirret, Negar
+**Authors:** Viirret, Timonen, Leino, Daneshvar
 
 ---
 
