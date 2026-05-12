@@ -75,7 +75,7 @@ The frontend (React) is not covered by automated tests in this phase.
 
 ## References
 
-- ADR-003: Use React (for Frontend Development)
+- ADR-003: Use Nix for CI/CD pipeline  
 - ADR-005: Nix/NixOS for CI/CD pipeline
 - `server/` — backend source code
 - `.github/workflows/ci.yml` — CI pipeline configuration
