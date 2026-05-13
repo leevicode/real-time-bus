@@ -4,7 +4,7 @@
 **Course:** Continuous Software Engineering
 **University:** University of Jyväskylä
 **Date:** May 2026
-**Team:** Leevi Leinonen, Valtteri Timonen, viirret, Negar Daneshvar
+**Team:** Viirret, Timonen, Leino, Daneshvar
 **Repository:** https://github.com/leevicode/real-time-bus
 
 ---
