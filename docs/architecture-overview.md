@@ -28,7 +28,7 @@ A web application that displays live bus positions and route information for Jyv
 │           React + TypeScript + Vite              │
 │                                                  │
 │  ┌──────────┐  ┌──────────────────────────────┐  │
-│  │  Map UI  │  │  WebSocket (live positions)  │  │
+│  │  Map UI  │  │  WebSocket Client            │  │
 │  └──────────┘  └──────────────────────────────┘  │
 └──────────────┬──────────────────┬───────────────┘
                │ HTTP REST        │ WebSocket
